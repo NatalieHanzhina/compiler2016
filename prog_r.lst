@@ -1,0 +1,21 @@
+               Работает Pascal - компилятор 
+                   Листинг программы
+   1  program example1; 
+   2  var a,b,l:integer; 
+   3  	 
+   4  function f(c:integer):integer; 
+   5   
+   6  	begin 
+   7  		f:=c+1; 
+   8  	end; 
+   9  begin 
+  10    read(a); 
+  11    while a<10 do 
+  12    begin 
+  13       a:=f(a); 
+  14    end; 
+  15    if a>10 then 
+  16    write(a); 
+  17  end. 
+
+Кoмпиляция окончена: ошибок нет !
