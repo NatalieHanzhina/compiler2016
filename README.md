@@ -6,6 +6,10 @@ gcc Main.c -o main
 # Run
 ./main program_to_compile listing  
 В случае отсутствия ошибок компиляции выходных файла будет два: листинг (.lst) и .asm
+# I/o Examples
+Примеры входных файлов в репозитории: prog - с ошибками, prog_r - без ошибок.
+
+Выходные: prog.lst, prog_r.lst соответственно, output.asm - ассемблерный код для prog_r
 # Lang
 Язык следующий:
 
