@@ -2,21 +2,21 @@
 #include <stdio.h>
 
 #include "string.h"
-/*Описание переменных простых типов. Выражения. Операторы: условный, составной, цикла*/
+/*РћРїРёСЃР°РЅРёРµ РїРµСЂРµРјРµРЅРЅС‹С… РїСЂРѕСЃС‚С‹С… С‚РёРїРѕРІ. Р’С‹СЂР°Р¶РµРЅРёСЏ. РћРїРµСЂР°С‚РѕСЂС‹: СѓСЃР»РѕРІРЅС‹Р№, СЃРѕСЃС‚Р°РІРЅРѕР№, С†РёРєР»Р°*/
 
-#define TYPES      121   /* ТИП */
-#define CONSTS     122   /* КОНСТАНТА */
-#define VARS       123   /* ПЕРЕМЕННАЯ */
-#define PROCS      124   /* ПРОЦЕДУРА */
-#define FUNCS      125   /* ФУНКЦИЯ   */
+#define TYPES      121   /* РўРРџ */
+#define CONSTS     122   /* РљРћРќРЎРўРђРќРўРђ */
+#define VARS       123   /* РџР•Р Р•РњР•РќРќРђРЇ */
+#define PROCS      124   /* РџР РћР¦Р•Р”РЈР Рђ */
+#define FUNCS      125   /* Р¤РЈРќРљР¦РРЇ   */
 /////////////////////code generation//////////////////////////////////////////////////////////////////////
 typedef struct typerec TYPEREC;
 int labelCounter=0;
 
-#define REFERENCE 1 /*локальная переменная или параметр-значение*/
-#define REGISTER  2 /* регистр */
-#define CONSTANT  3 /* непосредственное данное */
-#define REF_VAR   4 /* переменная, переданная по ссылке */
+#define REFERENCE 1 /*Р»РѕРєР°Р»СЊРЅР°СЏ РїРµСЂРµРјРµРЅРЅР°СЏ РёР»Рё РїР°СЂР°РјРµС‚СЂ-Р·РЅР°С‡РµРЅРёРµ*/
+#define REGISTER  2 /* СЂРµРіРёСЃС‚СЂ */
+#define CONSTANT  3 /* РЅРµРїРѕСЃСЂРµРґСЃС‚РІРµРЅРЅРѕРµ РґР°РЅРЅРѕРµ */
+#define REF_VAR   4 /* РїРµСЂРµРјРµРЅРЅР°СЏ, РїРµСЂРµРґР°РЅРЅР°СЏ РїРѕ СЃСЃС‹Р»РєРµ */
 
 unsigned nocode=0;
 FILE *output;
@@ -25,43 +25,43 @@ FILE *output;
 extern void Error(unsigned);
 
 void block(unsigned *followers);
-union const_val /* значение константы */
+union const_val /* Р·РЅР°С‡РµРЅРёРµ РєРѕРЅСЃС‚Р°РЅС‚С‹ */
 {
-	int intval      /* целого  или символьного типа */ ;
+	int intval      /* С†РµР»РѕРіРѕ  РёР»Рё СЃРёРјРІРѕР»СЊРЅРѕРіРѕ С‚РёРїР° */ ;
 	int boolval;
 };
 
 struct idparam
- { unsigned parhash; /* Значение Hash - функции */
-   char *patidn; /* Ссылка на имя в таблице имен */
-   TYPEREC *Type; /* Информация о типе параметра */
-   int mettransf; /* Способ передачи */
-   //struct prfun_as_par *par; /* Ссылка на информацию о параметрах параметра - процедуры */
-   unsigned par_offset;/* смещение параметра относительно начала области данных */   
-   struct idparam *linkparam; /* Ссылка на информацию о следующем параметре */
+ { unsigned parhash; /* Р—РЅР°С‡РµРЅРёРµ Hash - С„СѓРЅРєС†РёРё */
+   char *patidn; /* РЎСЃС‹Р»РєР° РЅР° РёРјСЏ РІ С‚Р°Р±Р»РёС†Рµ РёРјРµРЅ */
+   TYPEREC *Type; /* РРЅС„РѕСЂРјР°С†РёСЏ Рѕ С‚РёРїРµ РїР°СЂР°РјРµС‚СЂР° */
+   int mettransf; /* РЎРїРѕСЃРѕР± РїРµСЂРµРґР°С‡Рё */
+   //struct prfun_as_par *par; /* РЎСЃС‹Р»РєР° РЅР° РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РїР°СЂР°РјРµС‚СЂР°С… РїР°СЂР°РјРµС‚СЂР° - РїСЂРѕС†РµРґСѓСЂС‹ */
+   unsigned par_offset;/* СЃРјРµС‰РµРЅРёРµ РїР°СЂР°РјРµС‚СЂР° РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ РЅР°С‡Р°Р»Р° РѕР±Р»Р°СЃС‚Рё РґР°РЅРЅС‹С… */   
+   struct idparam *linkparam; /* РЎСЃС‹Р»РєР° РЅР° РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ СЃР»РµРґСѓСЋС‰РµРј РїР°СЂР°РјРµС‚СЂРµ */
  };
 
 struct treenode
 {
-	unsigned hashvalue   /* значение hash - функции */;
-	char *idname        /* адрес имени в таблице имён */ ;
-	unsigned clas      /* способ использования */;
-    TYPEREC  *idtype; /* указатель на дескриптор типа */
+	unsigned hashvalue   /* Р·РЅР°С‡РµРЅРёРµ hash - С„СѓРЅРєС†РёРё */;
+	char *idname        /* Р°РґСЂРµСЃ РёРјРµРЅРё РІ С‚Р°Р±Р»РёС†Рµ РёРјС‘РЅ */ ;
+	unsigned clas      /* СЃРїРѕСЃРѕР± РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ */;
+    TYPEREC  *idtype; /* СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РґРµСЃРєСЂРёРїС‚РѕСЂ С‚РёРїР° */
 	union
-	{  /* для констант */
-		union const_val constvalue; /* значение константы */
-        /* для процедур ( функций )  */
+	{  /* РґР»СЏ РєРѕРЅСЃС‚Р°РЅС‚ */
+		union const_val constvalue; /* Р·РЅР°С‡РµРЅРёРµ РєРѕРЅСЃС‚Р°РЅС‚С‹ */
+        /* РґР»СЏ РїСЂРѕС†РµРґСѓСЂ ( С„СѓРЅРєС†РёР№ )  */
         struct
         {
-			struct idparam *param /* указатель  на информацию о параметрах */;
-			int forw /* информация об опережающем описании */;
+			struct idparam *param /* СѓРєР°Р·Р°С‚РµР»СЊ  РЅР° РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ РїР°СЂР°РјРµС‚СЂР°С… */;
+			int forw /* РёРЅС„РѕСЂРјР°С†РёСЏ РѕР± РѕРїРµСЂРµР¶Р°СЋС‰РµРј РѕРїРёСЃР°РЅРёРё */;
 			int io; /*1-read, 2-readln, 3-write, 4-writeln*/
         } proc;
 		struct
 		{ 
 			unsigned staticlevel;
 			unsigned offset;
-			unsigned param_var /* =TRUE,  если переменная является параметром, переданным по ссылке */;
+			unsigned param_var /* =TRUE,  РµСЃР»Рё РїРµСЂРµРјРµРЅРЅР°СЏ СЏРІР»СЏРµС‚СЃСЏ РїР°СЂР°РјРµС‚СЂРѕРј, РїРµСЂРµРґР°РЅРЅС‹Рј РїРѕ СЃСЃС‹Р»РєРµ */;
 		} vars;
 	} casenode;
 
@@ -69,39 +69,39 @@ struct treenode
 	struct treenode *rightlink;
 }*CreatedNode = NULL, *LocalTree = NULL;
 typedef struct treenode NODE;
-//Структура дескриптора типа:
+//РЎС‚СЂСѓРєС‚СѓСЂР° РґРµСЃРєСЂРёРїС‚РѕСЂР° С‚РёРїР°:
 union variapart 
 { 
 	TYPEREC  *basetype;
-        /* для перечислимого типа */
-        struct reestrconsts  *firstconst;  /* указатель на первый элемент списка констант */
+        /* РґР»СЏ РїРµСЂРµС‡РёСЃР»РёРјРѕРіРѕ С‚РёРїР° */
+        struct reestrconsts  *firstconst;  /* СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РїРµСЂРІС‹Р№ СЌР»РµРјРµРЅС‚ СЃРїРёСЃРєР° РєРѕРЅСЃС‚Р°РЅС‚ */
 
 };  /* end of union variant */
 
-struct reestrconsts  /* структура элемента списка констант перечислительного типа*/
+struct reestrconsts  /* СЃС‚СЂСѓРєС‚СѓСЂР° СЌР»РµРјРµРЅС‚Р° СЃРїРёСЃРєР° РєРѕРЅСЃС‚Р°РЅС‚ РїРµСЂРµС‡РёСЃР»РёС‚РµР»СЊРЅРѕРіРѕ С‚РёРїР°*/
 {
-	char *addrconsts; /* адрес индентификатора в таблице имен */
-	struct reestrconsts *next; /* указатель  на следующую структуру*/
+	char *addrconsts; /* Р°РґСЂРµСЃ РёРЅРґРµРЅС‚РёС„РёРєР°С‚РѕСЂР° РІ С‚Р°Р±Р»РёС†Рµ РёРјРµРЅ */
+	struct reestrconsts *next; /* СѓРєР°Р·Р°С‚РµР»СЊ  РЅР° СЃР»РµРґСѓСЋС‰СѓСЋ СЃС‚СЂСѓРєС‚СѓСЂСѓ*/
 };
 struct typerec
 {
-	struct typerec *next;  /* указатель на следующий дескриптор типа */
-	unsigned typecode;  /* код типа */
+	struct typerec *next;  /* СѓРєР°Р·Р°С‚РµР»СЊ РЅР° СЃР»РµРґСѓСЋС‰РёР№ РґРµСЃРєСЂРёРїС‚РѕСЂ С‚РёРїР° */
+	unsigned typecode;  /* РєРѕРґ С‚РёРїР° */
 	union variapart casetype;
 } *booltype, *inttype, *chartype, *stringtype, *vartype, *ConstantType = NULL;
 
-//Это структура-описатель области действия localscope
+//Р­С‚Рѕ СЃС‚СЂСѓРєС‚СѓСЂР°-РѕРїРёСЃР°С‚РµР»СЊ РѕР±Р»Р°СЃС‚Рё РґРµР№СЃС‚РІРёСЏ localscope
 struct scope
 {
 	struct treenode *firstlocal;
 	TYPEREC *typechain;
 	struct scope *enclosingscope;
-	int count_locals /* размер области данных */;
+	int count_locals /* СЂР°Р·РјРµСЂ РѕР±Р»Р°СЃС‚Рё РґР°РЅРЅС‹С… */;
 	int level;
 } *localscope;
 typedef struct scope SCOPE;
 int level=0;
-//Открытие новой области действия
+//РћС‚РєСЂС‹С‚РёРµ РЅРѕРІРѕР№ РѕР±Р»Р°СЃС‚Рё РґРµР№СЃС‚РІРёСЏ
 void open_scope()
 {
 	SCOPE *newscope;
@@ -113,7 +113,7 @@ void open_scope()
 	newscope->level=level++;
 	localscope = newscope;	
 };
-void dispose_types( TYPEREC* Item ) { /* Удаление Таблицы Типов */
+void dispose_types( TYPEREC* Item ) { /* РЈРґР°Р»РµРЅРёРµ РўР°Р±Р»РёС†С‹ РўРёРїРѕРІ */
   TYPEREC* PrevItem;
   while(Item!=NULL)
    { PrevItem=Item; 
@@ -122,33 +122,33 @@ void dispose_types( TYPEREC* Item ) { /* Удаление Таблицы Типов */
    };
 };
 
-void dispose_ids(struct treenode* Root) { /* Удаление Таблицы Идентификаторов */
+void dispose_ids(struct treenode* Root) { /* РЈРґР°Р»РµРЅРёРµ РўР°Р±Р»РёС†С‹ РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂРѕРІ */
    if(Root!=NULL)
    { dispose_ids(Root->leftlink); 
      dispose_ids(Root->rightlink); 
      free((char*) Root); 
    };
 }
-//Закрытие области действия
+//Р—Р°РєСЂС‹С‚РёРµ РѕР±Р»Р°СЃС‚Рё РґРµР№СЃС‚РІРёСЏ
 void close_scope()
 {
 	//localscope = localscope->enclosingscope;
 	SCOPE *oldscope; 
 	oldscope=localscope;
-	localscope=localscope->enclosingscope;  /* Удаление Таблицы Идентификаторов */
-	dispose_ids( oldscope->firstlocal);  /* Удаление Таблицы Типов */
+	localscope=localscope->enclosingscope;  /* РЈРґР°Р»РµРЅРёРµ РўР°Р±Р»РёС†С‹ РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂРѕРІ */
+	dispose_ids( oldscope->firstlocal);  /* РЈРґР°Р»РµРЅРёРµ РўР°Р±Р»РёС†С‹ РўРёРїРѕРІ */
 	dispose_types( oldscope->typechain);  
 	free( (char *) oldscope);
 }
 
-//Внесение нового дескриптора типа в таблицу типов
+//Р’РЅРµСЃРµРЅРёРµ РЅРѕРІРѕРіРѕ РґРµСЃРєСЂРёРїС‚РѕСЂР° С‚РёРїР° РІ С‚Р°Р±Р»РёС†Сѓ С‚РёРїРѕРІ
 TYPEREC *newtype(int tcode)
 {
 	struct typerec *new1;
 	new1 = (struct typerec*)malloc(sizeof(struct typerec));
 	new1->typecode = tcode;
 	new1->next = localscope->typechain;
-	//Вставляем вершину в список. В зависимости от типа настраиваем начальные значения
+	//Р’СЃС‚Р°РІР»СЏРµРј РІРµСЂС€РёРЅСѓ РІ СЃРїРёСЃРѕРє. Р’ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С‚РёРїР° РЅР°СЃС‚СЂР°РёРІР°РµРј РЅР°С‡Р°Р»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ
 	
 	switch (new1->typecode)
 	{
@@ -164,18 +164,18 @@ TYPEREC *newtype(int tcode)
 	return(new1);
 }
 
-//Внесение нового идентификатора в таблицу идентификаторов
-//В переменную CreatedNode вносится ссылка на созданный элемент
+//Р’РЅРµСЃРµРЅРёРµ РЅРѕРІРѕРіРѕ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂР° РІ С‚Р°Р±Р»РёС†Сѓ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂРѕРІ
+//Р’ РїРµСЂРµРјРµРЅРЅСѓСЋ CreatedNode РІРЅРѕСЃРёС‚СЃСЏ СЃСЃС‹Р»РєР° РЅР° СЃРѕР·РґР°РЅРЅС‹Р№ СЌР»РµРјРµРЅС‚
 NODE *newident(NODE *Tree,unsigned hashfunc,char *addrname,int classused)
 {
 	NODE *tree;
 	int flag = 0;
 	tree = Tree;
-	//Проводим поиск текущего идентификатора в данной области действия.
-	//За его присутствие отвечает переменная flag
+	//РџСЂРѕРІРѕРґРёРј РїРѕРёСЃРє С‚РµРєСѓС‰РµРіРѕ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂР° РІ РґР°РЅРЅРѕР№ РѕР±Р»Р°СЃС‚Рё РґРµР№СЃС‚РІРёСЏ.
+	//Р—Р° РµРіРѕ РїСЂРёСЃСѓС‚СЃС‚РІРёРµ РѕС‚РІРµС‡Р°РµС‚ РїРµСЂРµРјРµРЅРЅР°СЏ flag
 	while ((tree != NULL) && (flag != 1))
 	{
-		//Если нашли - flag стави на 1
+		//Р•СЃР»Рё РЅР°С€Р»Рё - flag СЃС‚Р°РІРё РЅР° 1
 		if ((tree->idname == addrname) && (tree->clas == classused))
 		{
 			if ((tree->clas==FUNCS || tree->clas==PROCS) && tree->casenode.proc.forw)
@@ -186,7 +186,7 @@ NODE *newident(NODE *Tree,unsigned hashfunc,char *addrname,int classused)
 			else
 				flag = 1;
 		}
-		//Если нет - ищем дальше по дереву. В зависимости от хеш-функции.
+		//Р•СЃР»Рё РЅРµС‚ - РёС‰РµРј РґР°Р»СЊС€Рµ РїРѕ РґРµСЂРµРІСѓ. Р’ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ С…РµС€-С„СѓРЅРєС†РёРё.
 		else
 			if (tree->hashvalue  < hashfunc)
 			{
@@ -197,8 +197,8 @@ NODE *newident(NODE *Tree,unsigned hashfunc,char *addrname,int classused)
 				tree=tree->leftlink ;
 			}
 	}
-	//Если переменная существует, то выводим ошибку
-	//и возвращаем ссылку на этот идентификатор
+	//Р•СЃР»Рё РїРµСЂРµРјРµРЅРЅР°СЏ СЃСѓС‰РµСЃС‚РІСѓРµС‚, С‚Рѕ РІС‹РІРѕРґРёРј РѕС€РёР±РєСѓ
+	//Рё РІРѕР·РІСЂР°С‰Р°РµРј СЃСЃС‹Р»РєСѓ РЅР° СЌС‚РѕС‚ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ
 	if (flag == 1)
 	{
 		
@@ -206,10 +206,10 @@ NODE *newident(NODE *Tree,unsigned hashfunc,char *addrname,int classused)
 		nocode=1;
 		//return Tree;
 	}
-	//Если не найден
+	//Р•СЃР»Рё РЅРµ РЅР°Р№РґРµРЅ
 	else
 	{
-		//Пришли в конец - вставляем
+		//РџСЂРёС€Р»Рё РІ РєРѕРЅРµС† - РІСЃС‚Р°РІР»СЏРµРј
 		if (!Tree) 
 		{
 			Tree = (NODE *) malloc(sizeof(NODE));
@@ -222,9 +222,9 @@ NODE *newident(NODE *Tree,unsigned hashfunc,char *addrname,int classused)
 			Tree->rightlink = NULL;
 			CreatedNode = Tree;
 		}
-		//Не нашли - идем дальше рекурсивно
+		//РќРµ РЅР°С€Р»Рё - РёРґРµРј РґР°Р»СЊС€Рµ СЂРµРєСѓСЂСЃРёРІРЅРѕ
 		else
-			if (hashfunc < Tree->hashvalue) // Либо влево либо вправо
+			if (hashfunc < Tree->hashvalue) // Р›РёР±Рѕ РІР»РµРІРѕ Р»РёР±Рѕ РІРїСЂР°РІРѕ
 			{
 				Tree->leftlink =newident(Tree->leftlink,hashfunc,addrname,classused);
 			}
@@ -232,15 +232,15 @@ NODE *newident(NODE *Tree,unsigned hashfunc,char *addrname,int classused)
 			{
 				Tree->rightlink =newident(Tree->rightlink ,hashfunc,addrname,classused);
 			}
-		//return Tree; //Возвращаем это дерево
+		//return Tree; //Р’РѕР·РІСЂР°С‰Р°РµРј СЌС‚Рѕ РґРµСЂРµРІРѕ
 	}
 	return Tree; 
 };
 
 typedef struct reestrconsts LIST;
 
-//Добавление новой константы в дескриптор перечисляемого типа.
-//Тупо вставка в начало
+//Р”РѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕР№ РєРѕРЅСЃС‚Р°РЅС‚С‹ РІ РґРµСЃРєСЂРёРїС‚РѕСЂ РїРµСЂРµС‡РёСЃР»СЏРµРјРѕРіРѕ С‚РёРїР°.
+//РўСѓРїРѕ РІСЃС‚Р°РІРєР° РІ РЅР°С‡Р°Р»Рѕ
 LIST* newcons(LIST *List, char *addrname)
 {
 	LIST *nov;
@@ -250,21 +250,21 @@ LIST* newcons(LIST *List, char *addrname)
 	return nov;
 }
 
-//Элемент вспомогательного списка
+//Р­Р»РµРјРµРЅС‚ РІСЃРїРѕРјРѕРіР°С‚РµР»СЊРЅРѕРіРѕ СЃРїРёСЃРєР°
 struct listrec
 {
 	struct treenode *id_r;
 	struct listrec *next;
 }*varlist;
 
-//Поиск идентификатора в таблице. Сам же и выдает ошибку если его там нет
-//А если есть, то возвращает ссылку на него
+//РџРѕРёСЃРє РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂР° РІ С‚Р°Р±Р»РёС†Рµ. РЎР°Рј Р¶Рµ Рё РІС‹РґР°РµС‚ РѕС€РёР±РєСѓ РµСЃР»Рё РµРіРѕ С‚Р°Рј РЅРµС‚
+//Рђ РµСЃР»Рё РµСЃС‚СЊ, С‚Рѕ РІРѕР·РІСЂР°С‰Р°РµС‚ СЃСЃС‹Р»РєСѓ РЅР° РЅРµРіРѕ
 NODE *SearchIdent (SCOPE* local,char *addrname,unsigned hashfunc)
 {
 	int flag=0;
 	SCOPE* current = local;
 	NODE* Tree = local->firstlocal;
-	//Поиск по дереву элемента во всех областях действия
+	//РџРѕРёСЃРє РїРѕ РґРµСЂРµРІСѓ СЌР»РµРјРµРЅС‚Р° РІРѕ РІСЃРµС… РѕР±Р»Р°СЃС‚СЏС… РґРµР№СЃС‚РІРёСЏ
 	while (flag == 0)
 	{
 		Tree = current->firstlocal;
@@ -272,7 +272,7 @@ NODE *SearchIdent (SCOPE* local,char *addrname,unsigned hashfunc)
 		{
 			if ((Tree->idname == addrname))
 			{
-				flag = 1; //Нашли
+				flag = 1; //РќР°С€Р»Рё
 			}
 			else
 				if (Tree->hashvalue  < hashfunc)
@@ -284,19 +284,19 @@ NODE *SearchIdent (SCOPE* local,char *addrname,unsigned hashfunc)
 					Tree=Tree->leftlink ;
 				};
 		}
-		//переход на другую область действия если не нашли в этой
+		//РїРµСЂРµС…РѕРґ РЅР° РґСЂСѓРіСѓСЋ РѕР±Р»Р°СЃС‚СЊ РґРµР№СЃС‚РІРёСЏ РµСЃР»Рё РЅРµ РЅР°С€Р»Рё РІ СЌС‚РѕР№
 		if (current->enclosingscope != NULL) 
 			current = current->enclosingscope;
 		else break;
 	}
-	//Если элемент не найден - выводим ошибку о том, что имя не описано
+	//Р•СЃР»Рё СЌР»РµРјРµРЅС‚ РЅРµ РЅР°Р№РґРµРЅ - РІС‹РІРѕРґРёРј РѕС€РёР±РєСѓ Рѕ С‚РѕРј, С‡С‚Рѕ РёРјСЏ РЅРµ РѕРїРёСЃР°РЅРѕ
 	if (flag == 0)
 	{
 		
 		return NULL;
 	}
 	//else
-		//Возвращаем ссылку на этот идентификатор
+		//Р’РѕР·РІСЂР°С‰Р°РµРј СЃСЃС‹Р»РєСѓ РЅР° СЌС‚РѕС‚ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ
 		return Tree;
 }
 /*void bssSection(NODE* tree)
@@ -318,12 +318,12 @@ NODE *SearchIdent (SCOPE* local,char *addrname,unsigned hashfunc)
 			}
 		}	 
  }*/
-//Заносит новую переменную в список переменных, ожидающих указанмя типа
-//(когда в vardeclaration описали все переменные, а тип - тока в конце написан
-//тогда все они заносятся в очередь и в конце получают тип
+//Р—Р°РЅРѕСЃРёС‚ РЅРѕРІСѓСЋ РїРµСЂРµРјРµРЅРЅСѓСЋ РІ СЃРїРёСЃРѕРє РїРµСЂРµРјРµРЅРЅС‹С…, РѕР¶РёРґР°СЋС‰РёС… СѓРєР°Р·Р°РЅРјСЏ С‚РёРїР°
+//(РєРѕРіРґР° РІ vardeclaration РѕРїРёСЃР°Р»Рё РІСЃРµ РїРµСЂРµРјРµРЅРЅС‹Рµ, Р° С‚РёРї - С‚РѕРєР° РІ РєРѕРЅС†Рµ РЅР°РїРёСЃР°РЅ
+//С‚РѕРіРґР° РІСЃРµ РѕРЅРё Р·Р°РЅРѕСЃСЏС‚СЃСЏ РІ РѕС‡РµСЂРµРґСЊ Рё РІ РєРѕРЅС†Рµ РїРѕР»СѓС‡Р°СЋС‚ С‚РёРї
 void newvariable()
 {
-	//Опять просто вставка в начало списка
+	//РћРїСЏС‚СЊ РїСЂРѕСЃС‚Рѕ РІСЃС‚Р°РІРєР° РІ РЅР°С‡Р°Р»Рѕ СЃРїРёСЃРєР°
 	struct listrec *listentry;
 	if (symbol == ident)
 	{
@@ -336,12 +336,12 @@ void newvariable()
 	};
 };
 
-//Это как раз приписывание типа всем переменным, ожидающим в очереди
+//Р­С‚Рѕ РєР°Рє СЂР°Р· РїСЂРёРїРёСЃС‹РІР°РЅРёРµ С‚РёРїР° РІСЃРµРј РїРµСЂРµРјРµРЅРЅС‹Рј, РѕР¶РёРґР°СЋС‰РёРј РІ РѕС‡РµСЂРµРґРё
 void addattributes()
 {
 	 struct listrec *listentry, *oldentry;
 	 listentry = varlist;
-	 //Пройдем по порядочку
+	 //РџСЂРѕР№РґРµРј РїРѕ РїРѕСЂСЏРґРѕС‡РєСѓ
 	 while (listentry!=NULL)
 	 {
 		 listentry->id_r->idtype = vartype;
@@ -354,58 +354,58 @@ void addattributes()
 		}
 		 oldentry = listentry;
 		 listentry = listentry->next;
-		 //Очищаем элемент очереди после того, как дописали
+		 //РћС‡РёС‰Р°РµРј СЌР»РµРјРµРЅС‚ РѕС‡РµСЂРµРґРё РїРѕСЃР»Рµ С‚РѕРіРѕ, РєР°Рє РґРѕРїРёСЃР°Р»Рё
 		 free((void *) oldentry);
 	 }
 }
 
-//Проверка совместимости типов
+//РџСЂРѕРІРµСЂРєР° СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё С‚РёРїРѕРІ
  int Compatible(TYPEREC* f, TYPEREC* s)
  {
-	if ((s == NULL) || (f == NULL)) return 0; //Это если один из типов не правильный, то сразу выйдем, чтобы без ошибок
+	if ((s == NULL) || (f == NULL)) return 0; //Р­С‚Рѕ РµСЃР»Рё РѕРґРёРЅ РёР· С‚РёРїРѕРІ РЅРµ РїСЂР°РІРёР»СЊРЅС‹Р№, С‚Рѕ СЃСЂР°Р·Сѓ РІС‹Р№РґРµРј, С‡С‚РѕР±С‹ Р±РµР· РѕС€РёР±РѕРє
 	if (f == s) 
 		return 1;
 	return 0;
  }
 
 ////////////////
-//Главная часть
+//Р“Р»Р°РІРЅР°СЏ С‡Р°СЃС‚СЊ
 ////////////////
  
-//Объявления 
+//РћР±СЉСЏРІР»РµРЅРёСЏ 
  TYPEREC* simpletype();
  TYPEREC* arraytype();
  TYPEREC* expression ();
  void operatore();
  TYPEREC* SimpleExpression();
-//Фунцкии
+//Р¤СѓРЅС†РєРёРё
 
- //Функция IsConstant возвращает 1, если символ - числовая константа.
- //Иначе возвращает 0. В переменную COnstantType заносится ссылка на дескриптор типа константы.
+ //Р¤СѓРЅРєС†РёСЏ IsConstant РІРѕР·РІСЂР°С‰Р°РµС‚ 1, РµСЃР»Рё СЃРёРјРІРѕР» - С‡РёСЃР»РѕРІР°СЏ РєРѕРЅСЃС‚Р°РЅС‚Р°.
+ //РРЅР°С‡Рµ РІРѕР·РІСЂР°С‰Р°РµС‚ 0. Р’ РїРµСЂРµРјРµРЅРЅСѓСЋ COnstantType Р·Р°РЅРѕСЃРёС‚СЃСЏ СЃСЃС‹Р»РєР° РЅР° РґРµСЃРєСЂРёРїС‚РѕСЂ С‚РёРїР° РєРѕРЅСЃС‚Р°РЅС‚С‹.
  int IsConstant(unsigned smb)
  {
     if (smb == stringc)
 	{
-		ConstantType = stringtype; //Возвращаем дескриптор типа real
+		ConstantType = stringtype; //Р’РѕР·РІСЂР°С‰Р°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ С‚РёРїР° real
 		return 1;
 	}
 	if (smb == intc)
 	{
-		ConstantType = inttype;	//Возвращаем дескриптор типа int
+		ConstantType = inttype;	//Р’РѕР·РІСЂР°С‰Р°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ С‚РёРїР° int
 		return 1;
 	}
 	if (smb == charc)
 	{
-		ConstantType = chartype;	//Возвращаем дескриптор типа char
+		ConstantType = chartype;	//Р’РѕР·РІСЂР°С‰Р°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ С‚РёРїР° char
 		return 1;
 	}
 	return 0;
  }
- //Функция "тип" - проверяет синтаксис и семантику описания типа, возвращая ссылку на 
- //дескриптор этого типа
+ //Р¤СѓРЅРєС†РёСЏ "С‚РёРї" - РїСЂРѕРІРµСЂСЏРµС‚ СЃРёРЅС‚Р°РєСЃРёСЃ Рё СЃРµРјР°РЅС‚РёРєСѓ РѕРїРёСЃР°РЅРёСЏ С‚РёРїР°, РІРѕР·РІСЂР°С‰Р°СЏ СЃСЃС‹Р»РєСѓ РЅР° 
+ //РґРµСЃРєСЂРёРїС‚РѕСЂ СЌС‚РѕРіРѕ С‚РёРїР°
  TYPEREC* type (unsigned *followers)
 {
-	//Это дескриптор типа, который мы будем возвращать
+	//Р­С‚Рѕ РґРµСЃРєСЂРёРїС‚РѕСЂ С‚РёРїР°, РєРѕС‚РѕСЂС‹Р№ РјС‹ Р±СѓРґРµРј РІРѕР·РІСЂР°С‰Р°С‚СЊ
 	TYPEREC* TypeEntry = NULL;
 
 	if(!belong (symbol, st_typ))
@@ -414,7 +414,7 @@ void addattributes()
 		skipto2(st_typ, followers);
 		nocode=1;
 	}
-	//Иначе ссылку на дескриптор простого типа
+	//РРЅР°С‡Рµ СЃСЃС‹Р»РєСѓ РЅР° РґРµСЃРєСЂРёРїС‚РѕСЂ РїСЂРѕСЃС‚РѕРіРѕ С‚РёРїР°
 	else TypeEntry = simpletype (followers);
 
 	if (!belong (symbol, followers))
@@ -423,28 +423,28 @@ void addattributes()
 		skipto1(followers);
 		nocode=1;
 	}
-	//Возврат значения
+	//Р’РѕР·РІСЂР°С‚ Р·РЅР°С‡РµРЅРёСЏ
 	return TypeEntry;
 }
 
- //Функция Simpletype. Анализ простого типа. Возвращает ссылку на его дескриптор
+ //Р¤СѓРЅРєС†РёСЏ Simpletype. РђРЅР°Р»РёР· РїСЂРѕСЃС‚РѕРіРѕ С‚РёРїР°. Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃСЃС‹Р»РєСѓ РЅР° РµРіРѕ РґРµСЃРєСЂРёРїС‚РѕСЂ
  TYPEREC* simpletype (unsigned *followers)
  {
 	 NODE* Ident = NULL;//, *Ident2 = NULL;
 	 TYPEREC* TypeEntry = NULL;
-	 //Нейтрализация синтаксических ошибок
+	 //РќРµР№С‚СЂР°Р»РёР·Р°С†РёСЏ СЃРёРЅС‚Р°РєСЃРёС‡РµСЃРєРёС… РѕС€РёР±РѕРє
 	 if (!belong (symbol, st_simpletype))
 	 {
 		 Error (18);
 		 skipto2(st_simpletype, followers);
 		 nocode=1;
 	 }
-	 //Синтаксический и семантический анализ
+	 //РЎРёРЅС‚Р°РєСЃРёС‡РµСЃРєРёР№ Рё СЃРµРјР°РЅС‚РёС‡РµСЃРєРёР№ Р°РЅР°Р»РёР·
 	 if (symbol == ident) 
-	 //Либо это уже известный тип, либо ограниченный
-	 //Пример: integer - ident. Или a..b - ограниченный. Тоже начинается с ident.
+	 //Р›РёР±Рѕ СЌС‚Рѕ СѓР¶Рµ РёР·РІРµСЃС‚РЅС‹Р№ С‚РёРї, Р»РёР±Рѕ РѕРіСЂР°РЅРёС‡РµРЅРЅС‹Р№
+	 //РџСЂРёРјРµСЂ: integer - ident. РР»Рё a..b - РѕРіСЂР°РЅРёС‡РµРЅРЅС‹Р№. РўРѕР¶Рµ РЅР°С‡РёРЅР°РµС‚СЃСЏ СЃ ident.
 	 {
-		 //Находим этот идентификатор в нашей таблице
+		 //РќР°С…РѕРґРёРј СЌС‚РѕС‚ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РІ РЅР°С€РµР№ С‚Р°Р±Р»РёС†Рµ
 		 Ident = SearchIdent(localscope, addrname, hashresult);
 		 if (Ident==NULL) {Error(104);nocode=1;}
 		 nextsym ();
@@ -453,13 +453,13 @@ void addattributes()
 				 Error(100);
 				 nocode=1;
 			 }
-		 //Возвращаем значение
+		 //Р’РѕР·РІСЂР°С‰Р°РµРј Р·РЅР°С‡РµРЅРёРµ
 		 if ((Ident != NULL)) TypeEntry = Ident->idtype;
 		 else TypeEntry = NULL;
 
 	 }
 	 
-	 //Нейтрализация синтаксических ошибок
+	 //РќРµР№С‚СЂР°Р»РёР·Р°С†РёСЏ СЃРёРЅС‚Р°РєСЃРёС‡РµСЃРєРёС… РѕС€РёР±РѕРє
 	 if (!belong (symbol, followers))
 	 {
 		 Error (6);
@@ -477,21 +477,21 @@ void addattributes()
 		skipto2(idstarters, followers);
 		nocode=1;
 	}
-	//Если нашли описание переменных
+	//Р•СЃР»Рё РЅР°С€Р»Рё РѕРїРёСЃР°РЅРёРµ РїРµСЂРµРјРµРЅРЅС‹С…
 	if (symbol == ident)
 	{
-		varlist = NULL; //Инициализируем очередь переменных, ожидающих тип
-		newvariable();  //Вносим туда текущую переменную
+		varlist = NULL; //РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РѕС‡РµСЂРµРґСЊ РїРµСЂРµРјРµРЅРЅС‹С…, РѕР¶РёРґР°СЋС‰РёС… С‚РёРї
+		newvariable();  //Р’РЅРѕСЃРёРј С‚СѓРґР° С‚РµРєСѓС‰СѓСЋ РїРµСЂРµРјРµРЅРЅСѓСЋ
 		nextsym();
 		while (symbol == comma)
 		{
 			nextsym();
-			newvariable(); //Вносим переменные в список ожидания
+			newvariable(); //Р’РЅРѕСЃРёРј РїРµСЂРµРјРµРЅРЅС‹Рµ РІ СЃРїРёСЃРѕРє РѕР¶РёРґР°РЅРёСЏ
 			accept(ident);
 		}
 		accept(colon);
-		vartype = type(followers); //Узнаем тип всех этих переменных
-		addattributes(); //Присваиваем всем им этот тип
+		vartype = type(followers); //РЈР·РЅР°РµРј С‚РёРї РІСЃРµС… СЌС‚РёС… РїРµСЂРµРјРµРЅРЅС‹С…
+		addattributes(); //РџСЂРёСЃРІР°РёРІР°РµРј РІСЃРµРј РёРј СЌС‚РѕС‚ С‚РёРї
 
 		if (!belong (symbol, followers))
 		{
@@ -502,34 +502,34 @@ void addattributes()
 	}
 }
 
- //Обработка описания массива
+ //РћР±СЂР°Р±РѕС‚РєР° РѕРїРёСЃР°РЅРёСЏ РјР°СЃСЃРёРІР°
  //TYPEREC* arraytype(unsigned *followers)
  //{
-	//TYPEREC* TypeEntry = newtype(ARRAYS); //Создаем новый дескриптор типа массива
+	//TYPEREC* TypeEntry = newtype(ARRAYS); //РЎРѕР·РґР°РµРј РЅРѕРІС‹Р№ РґРµСЃРєСЂРёРїС‚РѕСЂ С‚РёРїР° РјР°СЃСЃРёРІР°
 	//struct indextyp* ptr = NULL;
 
 	//accept (arraysy); 
 	//accept (lbracket); 
 
-	////Инициализируем его вариантную часть. Выделяем память
+	////РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РµРіРѕ РІР°СЂРёР°РЅС‚РЅСѓСЋ С‡Р°СЃС‚СЊ. Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ
 	//TypeEntry->casetype.arraytype.indextype = (struct indextyp*)malloc(sizeof(struct indextyp*));
-	////Заносим тип первого индекса в дескриптор типа массива
+	////Р—Р°РЅРѕСЃРёРј С‚РёРї РїРµСЂРІРѕРіРѕ РёРЅРґРµРєСЃР° РІ РґРµСЃРєСЂРёРїС‚РѕСЂ С‚РёРїР° РјР°СЃСЃРёРІР°
 	//TypeEntry->casetype.arraytype.indextype->Type = simpletype (af_simpletype);
 
-	////Ставим указатель на первый индекс массива
+	////РЎС‚Р°РІРёРј СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РїРµСЂРІС‹Р№ РёРЅРґРµРєСЃ РјР°СЃСЃРёРІР°
 	//ptr = TypeEntry->casetype.arraytype.indextype;
-	////NEXT делаем NULL чтобы избежать ошибок
+	////NEXT РґРµР»Р°РµРј NULL С‡С‚РѕР±С‹ РёР·Р±РµР¶Р°С‚СЊ РѕС€РёР±РѕРє
 	//ptr->next = NULL;
 
-	////Пока запятая, считываем индексы по-очереди
+	////РџРѕРєР° Р·Р°РїСЏС‚Р°СЏ, СЃС‡РёС‚С‹РІР°РµРј РёРЅРґРµРєСЃС‹ РїРѕ-РѕС‡РµСЂРµРґРё
 	//while (symbol == comma)
 	//{
 	//	nextsym();
-	//	//Выделяем память под следующий индекс
+	//	//Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РїРѕРґ СЃР»РµРґСѓСЋС‰РёР№ РёРЅРґРµРєСЃ
 	//	ptr->next = (struct indextyp*)malloc(sizeof(struct indextyp*));
-	//	//Записываем этот тип в дескриптор типа массива
+	//	//Р—Р°РїРёСЃС‹РІР°РµРј СЌС‚РѕС‚ С‚РёРї РІ РґРµСЃРєСЂРёРїС‚РѕСЂ С‚РёРїР° РјР°СЃСЃРёРІР°
  //       ptr->next->Type = simpletype (af_simpletype);
-	//	//Переводим указатель и следующий делаем NULL
+	//	//РџРµСЂРµРІРѕРґРёРј СѓРєР°Р·Р°С‚РµР»СЊ Рё СЃР»РµРґСѓСЋС‰РёР№ РґРµР»Р°РµРј NULL
 	//	ptr = ptr->next;
 	//	ptr->next = NULL;
 	//}
@@ -537,12 +537,12 @@ void addattributes()
 	//accept (rbracket); 
 	//accept (ofsy);
 	//
-	////Тип элементов, из которых состоит массив считываем, как полагается, в конце
+	////РўРёРї СЌР»РµРјРµРЅС‚РѕРІ, РёР· РєРѕС‚РѕСЂС‹С… СЃРѕСЃС‚РѕРёС‚ РјР°СЃСЃРёРІ СЃС‡РёС‚С‹РІР°РµРј, РєР°Рє РїРѕР»Р°РіР°РµС‚СЃСЏ, РІ РєРѕРЅС†Рµ
 	//TypeEntry->casetype.arraytype.basetype = type(followers);
 	//return TypeEntry;
  //}
  
-//Описание раздела переменных. Тут только синтаксис возможен.
+//РћРїРёСЃР°РЅРёРµ СЂР°Р·РґРµР»Р° РїРµСЂРµРјРµРЅРЅС‹С…. РўСѓС‚ С‚РѕР»СЊРєРѕ СЃРёРЅС‚Р°РєСЃРёСЃ РІРѕР·РјРѕР¶РµРЅ.
  void varpart (unsigned *followers)
  {
 	 unsigned ptra [SET_SIZE];
@@ -580,7 +580,7 @@ int varval;
 struct idparam *funclistend;
 void newparam() 
 {
-	//пополняет список параметров
+	//РїРѕРїРѕР»РЅСЏРµС‚ СЃРїРёСЃРѕРє РїР°СЂР°РјРµС‚СЂРѕРІ
 	struct idparam	*par;
 	if (symbol==ident){
 		par=(struct idparam*) malloc (sizeof (struct idparam));
@@ -605,7 +605,7 @@ void newparam()
 	}
 }
 
-void addpartyp() { //использует funclist и заносит тип в ТПараметров
+void addpartyp() { //РёСЃРїРѕР»СЊР·СѓРµС‚ funclist Рё Р·Р°РЅРѕСЃРёС‚ С‚РёРї РІ РўРџР°СЂР°РјРµС‚СЂРѕРІ
 	struct idparam	*par;
 	par=LocalTree->casenode.proc.param;//funclistend;//CreatedNode->casenode.proc.param;
 	while (par->Type!=NULL) 
@@ -627,7 +627,7 @@ void groupofparam(unsigned *followers)
 	}
 	if(belong(symbol,idstarters))
 	{
-		varlist = NULL;//начало занесения в список параметров
+		varlist = NULL;//РЅР°С‡Р°Р»Рѕ Р·Р°РЅРµСЃРµРЅРёСЏ РІ СЃРїРёСЃРѕРє РїР°СЂР°РјРµС‚СЂРѕРІ
 		newvariable();
 		newparam();
 		accept(ident);
@@ -860,7 +860,7 @@ void procfuncpart(unsigned *followers)
 	 }
 }
 
-//Блок. Только синтаксис.
+//Р‘Р»РѕРє. РўРѕР»СЊРєРѕ СЃРёРЅС‚Р°РєСЃРёСЃ.
  void block (unsigned *followers)
  {
 	unsigned ptra[SET_SIZE];
@@ -1054,7 +1054,7 @@ void procfuncpart(unsigned *followers)
 					}
 		//		 accept(ident);
 			 } while (symbol == comma && ptrparam!=NULL);
-			 if (ptrparam!=NULL) //если число формальных и факт парам-в не равно
+			 if (ptrparam!=NULL) //РµСЃР»Рё С‡РёСЃР»Рѕ С„РѕСЂРјР°Р»СЊРЅС‹С… Рё С„Р°РєС‚ РїР°СЂР°Рј-РІ РЅРµ СЂР°РІРЅРѕ
 			 {
 				 Error(126);
 				 nocode=1;
@@ -1063,13 +1063,13 @@ void procfuncpart(unsigned *followers)
 		 }
 	 }
  }
- //Оператор.
+ //РћРїРµСЂР°С‚РѕСЂ.
  void operatore (unsigned *followers)
  {
 	 int localLabelCounter = labelCounter++;
-	 TYPEREC* exptyp;	//Тип выражения
-	 NODE* cond = NULL /*Идентификатор-условие*/, *caseid = NULL /**/; 
-	 struct textposition currentpos, exprpos; //Позиция в тексте (чтобы вывести ошибку в нужном месте)
+	 TYPEREC* exptyp;	//РўРёРї РІС‹СЂР°Р¶РµРЅРёСЏ
+	 NODE* cond = NULL /*РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ-СѓСЃР»РѕРІРёРµ*/, *caseid = NULL /**/; 
+	 struct textposition currentpos, exprpos; //РџРѕР·РёС†РёСЏ РІ С‚РµРєСЃС‚Рµ (С‡С‚РѕР±С‹ РІС‹РІРµСЃС‚Рё РѕС€РёР±РєСѓ РІ РЅСѓР¶РЅРѕРј РјРµСЃС‚Рµ)
 	 unsigned ptra [SET_SIZE];
 
 	 if (!belong (symbol, st_statement))
@@ -1078,7 +1078,7 @@ void procfuncpart(unsigned *followers)
 		 skipto2(st_statement, followers);
 		 nocode=1;
 	 }
-	 //Составной оператор. Семантики у него нет
+	 //РЎРѕСЃС‚Р°РІРЅРѕР№ РѕРїРµСЂР°С‚РѕСЂ. РЎРµРјР°РЅС‚РёРєРё Сѓ РЅРµРіРѕ РЅРµС‚
 	 if (symbol == beginsy)
 	 {
 		 SetDisjunct (af_compstatement, followers, ptra);
@@ -1091,21 +1091,21 @@ void procfuncpart(unsigned *followers)
 		 }
 		 accept (endsy);
 	 }
-	 //Условный оператор
+	 //РЈСЃР»РѕРІРЅС‹Р№ РѕРїРµСЂР°С‚РѕСЂ
 	 else if (symbol == ifsy)
 	 {
 
 		 SetDisjunct (af_iftrue, followers, ptra);
 		 accept (ifsy);
 
-		 exprpos = token; //Запоминаем позицию в тексте
-		 exptyp = expression (ptra); //Анализируем выраженеи
-		 currentpos = token; //Записываем позицию после выражения
-		 if ((exptyp == NULL) || (!Compatible(exptyp, booltype))) //Если тип не совместим с булевым
+		 exprpos = token; //Р—Р°РїРѕРјРёРЅР°РµРј РїРѕР·РёС†РёСЋ РІ С‚РµРєСЃС‚Рµ
+		 exptyp = expression (ptra); //РђРЅР°Р»РёР·РёСЂСѓРµРј РІС‹СЂР°Р¶РµРЅРµРё
+		 currentpos = token; //Р—Р°РїРёСЃС‹РІР°РµРј РїРѕР·РёС†РёСЋ РїРѕСЃР»Рµ РІС‹СЂР°Р¶РµРЅРёСЏ
+		 if ((exptyp == NULL) || (!Compatible(exptyp, booltype))) //Р•СЃР»Рё С‚РёРї РЅРµ СЃРѕРІРјРµСЃС‚РёРј СЃ Р±СѓР»РµРІС‹Рј
 		 {
-			 token = exprpos; //Вернемся назад
-			 Error(145);	//Выведем ошибку
-			 token = currentpos; //И обратно вперед
+			 token = exprpos; //Р’РµСЂРЅРµРјСЃСЏ РЅР°Р·Р°Рґ
+			 Error(145);	//Р’С‹РІРµРґРµРј РѕС€РёР±РєСѓ
+			 token = currentpos; //Р РѕР±СЂР°С‚РЅРѕ РІРїРµСЂРµРґ
 			 nocode=1;
 		 }
 
@@ -1191,7 +1191,7 @@ void procfuncpart(unsigned *followers)
 		if (exptyp != booltype) {Error (135);nocode=1;}
 
 	 }
-	 //Присваивание
+	 //РџСЂРёСЃРІР°РёРІР°РЅРёРµ
 	 else if (symbol == ident)
 	 {
 		 NODE* Ident = NULL;
@@ -1242,9 +1242,9 @@ void procfuncpart(unsigned *followers)
  }
 
  
-//Проверки арифметических операция - тупо перебором
+//РџСЂРѕРІРµСЂРєРё Р°СЂРёС„РјРµС‚РёС‡РµСЃРєРёС… РѕРїРµСЂР°С†РёСЏ - С‚СѓРїРѕ РїРµСЂРµР±РѕСЂРѕРј
 
- //Проверка выражения на принадлежность логическому типу
+ //РџСЂРѕРІРµСЂРєР° РІС‹СЂР°Р¶РµРЅРёСЏ РЅР° РїСЂРёРЅР°РґР»РµР¶РЅРѕСЃС‚СЊ Р»РѕРіРёС‡РµСЃРєРѕРјСѓ С‚РёРїСѓ
 TYPEREC* logical(TYPEREC* exptype)
 {
 	if (exptype == NULL) return NULL;
@@ -1255,7 +1255,7 @@ TYPEREC* logical(TYPEREC* exptype)
 	return NULL;
 }
 
-//Проверка корректности умножения
+//РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё СѓРјРЅРѕР¶РµРЅРёСЏ
 TYPEREC* test_mult(TYPEREC* exptype1, TYPEREC* exptype2)
 {
 	if ((exptype1 == NULL) || (exptype2 == NULL)) return NULL;
@@ -1267,7 +1267,7 @@ TYPEREC* test_mult(TYPEREC* exptype1, TYPEREC* exptype2)
 	return NULL;
 }
 
-//Проверка корректности сложения
+//РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё СЃР»РѕР¶РµРЅРёСЏ
 TYPEREC* test_add(TYPEREC* exptype1, TYPEREC* exptype2)
 {
 	if ((exptype1 == NULL) || (exptype2 == NULL)) return 0;
@@ -1279,7 +1279,7 @@ TYPEREC* test_add(TYPEREC* exptype1, TYPEREC* exptype2)
 	return NULL;
 }
 
-//Проверка корректности сравнения
+//РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё СЃСЂР°РІРЅРµРЅРёСЏ
 TYPEREC* test_comparing(TYPEREC* exptype1, TYPEREC* exptype2, unsigned operation)
 {
 	if ((exptype1 == NULL) || (exptype2 == NULL)) return 0;
@@ -1294,19 +1294,19 @@ TYPEREC* test_comparing(TYPEREC* exptype1, TYPEREC* exptype2, unsigned operation
 	return NULL;
 }
 
-//Проверка правильности знака перед выражением
+//РџСЂРѕРІРµСЂРєР° РїСЂР°РІРёР»СЊРЅРѕСЃС‚Рё Р·РЅР°РєР° РїРµСЂРµРґ РІС‹СЂР°Р¶РµРЅРёРµРј
 int right_sign(TYPEREC* exptype)
 {
 	if (exptype == NULL) return -1;
 	return ((exptype == inttype));
 }
 
-//Выражение
+//Р’С‹СЂР°Р¶РµРЅРёРµ
  TYPEREC* expression (unsigned *followers)
  {
 
-	 TYPEREC* ex1type = NULL, *ex2type; //Типы операндов
-	 unsigned operation; //Код операции
+	 TYPEREC* ex1type = NULL, *ex2type; //РўРёРїС‹ РѕРїРµСЂР°РЅРґРѕРІ
+	 unsigned operation; //РљРѕРґ РѕРїРµСЂР°С†РёРё
 	 int localLabelCounter=labelCounter++;
 	 if (!belong (symbol, st_express))
 	 {
@@ -1314,14 +1314,14 @@ int right_sign(TYPEREC* exptype)
 		 skipto2(st_express, followers);
 		 nocode=1;
 	 }
-	 ex1type = SimpleExpression (followers); //Тип первого выражения
-	 //Если символ - символ операции сравнения
+	 ex1type = SimpleExpression (followers); //РўРёРї РїРµСЂРІРѕРіРѕ РІС‹СЂР°Р¶РµРЅРёСЏ
+	 //Р•СЃР»Рё СЃРёРјРІРѕР» - СЃРёРјРІРѕР» РѕРїРµСЂР°С†РёРё СЃСЂР°РІРЅРµРЅРёСЏ
 	 if (belong(symbol, op_rel))
 	 {
-		 operation = symbol; //Запомним операцию
+		 operation = symbol; //Р—Р°РїРѕРјРЅРёРј РѕРїРµСЂР°С†РёСЋ
 		 nextsym();			
-		 ex2type = SimpleExpression (followers);	//Тип второго выражения
-		 ex1type = test_comparing(ex1type, ex2type,operation); //Проверка совместимости
+		 ex2type = SimpleExpression (followers);	//РўРёРї РІС‚РѕСЂРѕРіРѕ РІС‹СЂР°Р¶РµРЅРёСЏ
+		 ex1type = test_comparing(ex1type, ex2type,operation); //РџСЂРѕРІРµСЂРєР° СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё
 	 
 	 if (!nocode)
 	 {
@@ -1364,19 +1364,19 @@ int right_sign(TYPEREC* exptype)
 	 return ex1type;
  }
 
- //Множитель
+ //РњРЅРѕР¶РёС‚РµР»СЊ
  TYPEREC* factor (unsigned *followers)
  {
 	unsigned ptra [SET_SIZE];
 	TYPEREC* exptype = NULL;
-	NODE* node; //Указатель на вершину ТИ для текущего идентификатора
+	NODE* node; //РЈРєР°Р·Р°С‚РµР»СЊ РЅР° РІРµСЂС€РёРЅСѓ РўР РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂР°
 	 if (!belong (symbol, st_termfact))
 	 {
 		 Error(6);
 		 skipto2(st_termfact, followers);
 		 nocode=1;
 	 }
-	 //Либо это константа
+	 //Р›РёР±Рѕ СЌС‚Рѕ РєРѕРЅСЃС‚Р°РЅС‚Р°
 	 if (IsConstant(symbol))
 	 {
 		 exptype = ConstantType;
@@ -1401,13 +1401,13 @@ int right_sign(TYPEREC* exptype)
 		 }
 		 nextsym ();
 	 }
-	 //Либо идентификатор
+	 //Р›РёР±Рѕ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ
 	 else if (symbol == ident)
 	 {
-		 //Находим его
+		 //РќР°С…РѕРґРёРј РµРіРѕ
 		node = SearchIdent(localscope, addrname, hashresult);
 		if (node==NULL) { Error(104); exptype = NULL; nocode=1;}
-		//Узнаем тип
+		//РЈР·РЅР°РµРј С‚РёРї
 		else
 			switch(node->clas)
 		{
@@ -1443,21 +1443,21 @@ int right_sign(TYPEREC* exptype)
 		}
 		//else
 		//	exptype = NULL;//StandartFunc(followers);//NULL;
-		// !!!!!!!!!!!!!!!! закомменнчено, но не факт,что верно 
+		// !!!!!!!!!!!!!!!! Р·Р°РєРѕРјРјРµРЅРЅС‡РµРЅРѕ, РЅРѕ РЅРµ С„Р°РєС‚,С‡С‚Рѕ РІРµСЂРЅРѕ 
 	 }
-	 //Скобка
+	 //РЎРєРѕР±РєР°
 	 else if (symbol == leftpar)
 	 {
 		 nextsym();
-		 //Анализируем выражение в скобках
+		 //РђРЅР°Р»РёР·РёСЂСѓРµРј РІС‹СЂР°Р¶РµРЅРёРµ РІ СЃРєРѕР±РєР°С…
 		 exptype = expression (followers);
 		 accept (rightpar);
 	 }
-	 //Если NOT 
+	 //Р•СЃР»Рё NOT 
 	 else if (symbol == notsy)
 	 {
 		 accept (notsy);
-		 //Анализируем выражение и проверку его принадлежности к логическим
+		 //РђРЅР°Р»РёР·РёСЂСѓРµРј РІС‹СЂР°Р¶РµРЅРёРµ Рё РїСЂРѕРІРµСЂРєСѓ РµРіРѕ РїСЂРёРЅР°РґР»РµР¶РЅРѕСЃС‚Рё Рє Р»РѕРіРёС‡РµСЃРєРёРј
 		 exptype = factor (followers);
 		 exptype = logical(exptype);
 		 fprintf(output,"pop eax\n");
@@ -1467,9 +1467,9 @@ int right_sign(TYPEREC* exptype)
 	 else exptype = NULL;
 	 return exptype;
  }
- void multop (unsigned operation /* код операции */,
-                   TYPEREC *exptype   /* указатель на дескриптор типа
-                                                    результата операции */)
+ void multop (unsigned operation /* РєРѕРґ РѕРїРµСЂР°С†РёРё */,
+                   TYPEREC *exptype   /* СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РґРµСЃРєСЂРёРїС‚РѕСЂ С‚РёРїР°
+                                                    СЂРµР·СѓР»СЊС‚Р°С‚Р° РѕРїРµСЂР°С†РёРё */)
 { 
     switch ( operation )
     { 
@@ -1492,10 +1492,10 @@ int right_sign(TYPEREC* exptype)
     }
 }
 
- //Слагаемое
+ //РЎР»Р°РіР°РµРјРѕРµ
 TYPEREC* composed (unsigned *followers)
  {
-	 TYPEREC* ex1type = NULL, *ex2type; //Типы операндов
+	 TYPEREC* ex1type = NULL, *ex2type; //РўРёРїС‹ РѕРїРµСЂР°РЅРґРѕРІ
 	 unsigned operation;
 	 if (!belong(symbol, st_termfact))
 	 {
@@ -1503,23 +1503,23 @@ TYPEREC* composed (unsigned *followers)
 		 skipto2(st_termfact, followers);
 		 nocode=1;
 	 }
-	 ex1type = factor (followers); //Проверка типа множителя
+	 ex1type = factor (followers); //РџСЂРѕРІРµСЂРєР° С‚РёРїР° РјРЅРѕР¶РёС‚РµР»СЏ
          if ( !nocode )
 		 {
             fprintf(output,"pop ebx\n");
             fprintf(output,"pop eax\n");
 		 }
-	 while (belong(symbol, op_mult)) //Если символ - операции умножения/деления и т.п.
+	 while (belong(symbol, op_mult)) //Р•СЃР»Рё СЃРёРјРІРѕР» - РѕРїРµСЂР°С†РёРё СѓРјРЅРѕР¶РµРЅРёСЏ/РґРµР»РµРЅРёСЏ Рё С‚.Рї.
 	 { 
-		 operation = symbol; //Запоминаем операцию
+		 operation = symbol; //Р—Р°РїРѕРјРёРЅР°РµРј РѕРїРµСЂР°С†РёСЋ
 		 nextsym();
-		 ex2type = factor (followers); //Разбираемся с типами
+		 ex2type = factor (followers); //Р Р°Р·Р±РёСЂР°РµРјСЃСЏ СЃ С‚РёРїР°РјРё
          if ( !nocode )
 		 {
             fprintf(output,"pop ebx\n");
             fprintf(output,"pop eax\n");
 		 }
-		 ex1type = test_mult(ex1type, ex2type);//, operation); //Проверка корректности
+		 ex1type = test_mult(ex1type, ex2type);//, operation); //РџСЂРѕРІРµСЂРєР° РєРѕСЂСЂРµРєС‚РЅРѕСЃС‚Рё
          if ( !nocode )
 		 {
 			 multop ( operation, ex1type );
@@ -1530,20 +1530,20 @@ TYPEREC* composed (unsigned *followers)
 	 return ex1type;
  }
 
-//Простое выражение
+//РџСЂРѕСЃС‚РѕРµ РІС‹СЂР°Р¶РµРЅРёРµ
  TYPEREC* SimpleExpression (unsigned *followers)
  {
 	 TYPEREC* ex1type, *ex2type;
 	 unsigned operation, sign = 0;
-	 if ((symbol == minus) || (symbol == plus)) { sign = 1; nextsym(); } //Проверка знака
-	 ex1type = composed (followers);	 //Узнаем тип простого выражения
-	 if(sign) //Был ли знак
+	 if ((symbol == minus) || (symbol == plus)) { sign = 1; nextsym(); } //РџСЂРѕРІРµСЂРєР° Р·РЅР°РєР°
+	 ex1type = composed (followers);	 //РЈР·РЅР°РµРј С‚РёРї РїСЂРѕСЃС‚РѕРіРѕ РІС‹СЂР°Р¶РµРЅРёСЏ
+	 if(sign) //Р‘С‹Р» Р»Рё Р·РЅР°Рє
 		 right_sign(ex1type);
-	 while (belong(symbol, op_add)) //Проверка на принадлежность символа к операциям сложения/вычитания и т.п.
+	 while (belong(symbol, op_add)) //РџСЂРѕРІРµСЂРєР° РЅР° РїСЂРёРЅР°РґР»РµР¶РЅРѕСЃС‚СЊ СЃРёРјРІРѕР»Р° Рє РѕРїРµСЂР°С†РёСЏРј СЃР»РѕР¶РµРЅРёСЏ/РІС‹С‡РёС‚Р°РЅРёСЏ Рё С‚.Рї.
 	 {
-		 operation = symbol; //Запоминаем операции
+		 operation = symbol; //Р—Р°РїРѕРјРёРЅР°РµРј РѕРїРµСЂР°С†РёРё
 		 nextsym(); 
-		 ex2type = composed (followers); //Узнаем тип второго выражения
+		 ex2type = composed (followers); //РЈР·РЅР°РµРј С‚РёРї РІС‚РѕСЂРѕРіРѕ РІС‹СЂР°Р¶РµРЅРёСЏ
 		 ex1type = test_add(ex1type, ex2type);//, operation);
 		 if (!nocode)
 		 {
@@ -1567,57 +1567,57 @@ TYPEREC* composed (unsigned *followers)
 	 return ex1type;
  }
 
- //Функция programme. Создает фиктивную область действия и проверяет программу
+ //Р¤СѓРЅРєС†РёСЏ programme. РЎРѕР·РґР°РµС‚ С„РёРєС‚РёРІРЅСѓСЋ РѕР±Р»Р°СЃС‚СЊ РґРµР№СЃС‚РІРёСЏ Рё РїСЂРѕРІРµСЂСЏРµС‚ РїСЂРѕРіСЂР°РјРјСѓ
  void programme()
  {
-	//Организация фиктивной области действия
-	//Открываем стек области действия - localscope->firstlocal
+	//РћСЂРіР°РЅРёР·Р°С†РёСЏ С„РёРєС‚РёРІРЅРѕР№ РѕР±Р»Р°СЃС‚Рё РґРµР№СЃС‚РІРёСЏ
+	//РћС‚РєСЂС‹РІР°РµРј СЃС‚РµРє РѕР±Р»Р°СЃС‚Рё РґРµР№СЃС‚РІРёСЏ - localscope->firstlocal
 	open_scope();
-	//Создаем логический тип
+	//РЎРѕР·РґР°РµРј Р»РѕРіРёС‡РµСЃРєРёР№ С‚РёРї
 	booltype = newtype(ENUMS);
 	
-	//Добавляем в его дескриптор константы
+	//Р”РѕР±Р°РІР»СЏРµРј РІ РµРіРѕ РґРµСЃРєСЂРёРїС‚РѕСЂ РєРѕРЅСЃС‚Р°РЅС‚С‹
 	SearchInTable("false"); 
-	//SearchInTable находит идентификатор в таблице,
-	//Заносит значение hash-функции в hashresult, адрес в таблице имен - в addrname.
-	//newident изменяет копию localscope->firstlocal
+	//SearchInTable РЅР°С…РѕРґРёС‚ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РІ С‚Р°Р±Р»РёС†Рµ,
+	//Р—Р°РЅРѕСЃРёС‚ Р·РЅР°С‡РµРЅРёРµ hash-С„СѓРЅРєС†РёРё РІ hashresult, Р°РґСЂРµСЃ РІ С‚Р°Р±Р»РёС†Рµ РёРјРµРЅ - РІ addrname.
+	//newident РёР·РјРµРЅСЏРµС‚ РєРѕРїРёСЋ localscope->firstlocal
 	localscope->firstlocal = newident(localscope->firstlocal, hashresult, addrname, CONSTS);
-	//CreatedNode - переменная, обозачающая текущую вершину. Ту, которую мы создали
-	//Функцией newident
-	//Теперь зададим в нем ссылку на дескриптор типа
+	//CreatedNode - РїРµСЂРµРјРµРЅРЅР°СЏ, РѕР±РѕР·Р°С‡Р°СЋС‰Р°СЏ С‚РµРєСѓС‰СѓСЋ РІРµСЂС€РёРЅСѓ. РўСѓ, РєРѕС‚РѕСЂСѓСЋ РјС‹ СЃРѕР·РґР°Р»Рё
+	//Р¤СѓРЅРєС†РёРµР№ newident
+	//РўРµРїРµСЂСЊ Р·Р°РґР°РґРёРј РІ РЅРµРј СЃСЃС‹Р»РєСѓ РЅР° РґРµСЃРєСЂРёРїС‚РѕСЂ С‚РёРїР°
 	CreatedNode->idtype = booltype;
-	//Добавим константку false в дескриптор логисечкого типа
+	//Р”РѕР±Р°РІРёРј РєРѕРЅСЃС‚Р°РЅС‚РєСѓ false РІ РґРµСЃРєСЂРёРїС‚РѕСЂ Р»РѕРіРёСЃРµС‡РєРѕРіРѕ С‚РёРїР°
 	booltype->casetype.firstconst = newcons(booltype->casetype.firstconst, addrname);
 	CreatedNode->casenode.constvalue.boolval = 0;
-	//Сделаем то же самое с true
+	//РЎРґРµР»Р°РµРј С‚Рѕ Р¶Рµ СЃР°РјРѕРµ СЃ true
 	SearchInTable("true");
 	localscope->firstlocal = newident(localscope->firstlocal, hashresult, addrname, CONSTS);
 	CreatedNode->idtype = booltype;
 	booltype->casetype.firstconst = newcons(booltype->casetype.firstconst, addrname);
 	CreatedNode->casenode.constvalue.boolval = 1;
-	//Создадим остальные основные типы
+	//РЎРѕР·РґР°РґРёРј РѕСЃС‚Р°Р»СЊРЅС‹Рµ РѕСЃРЅРѕРІРЅС‹Рµ С‚РёРїС‹
 	chartype = newtype(SCALARS);
 	stringtype=newtype(STRINGS);
 	inttype = newtype(SCALARS);
 
 
-	//Создаем дескриптор типа integer
+	//РЎРѕР·РґР°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ С‚РёРїР° integer
 	SearchInTable("integer");
-	//Создадим идентификатор для integer, т.к. мы уже нашли addrname и hashresult
+	//РЎРѕР·РґР°РґРёРј РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РґР»СЏ integer, С‚.Рє. РјС‹ СѓР¶Рµ РЅР°С€Р»Рё addrname Рё hashresult
 	localscope->firstlocal = newident(localscope->firstlocal, hashresult, addrname, TYPES);
-	//Вставим в этот идентификатор ссылку на тип Integer (inttype)
+	//Р’СЃС‚Р°РІРёРј РІ СЌС‚РѕС‚ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃСЃС‹Р»РєСѓ РЅР° С‚РёРї Integer (inttype)
 	CreatedNode->idtype = inttype;
 
-	//Это - константа. 
+	//Р­С‚Рѕ - РєРѕРЅСЃС‚Р°РЅС‚Р°. 
 	SearchInTable("maxint");
-	//Создадим идентификатор
+	//РЎРѕР·РґР°РґРёРј РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ
 	localscope->firstlocal = newident(localscope->firstlocal, hashresult, addrname, CONSTS);
-	//Запишем ее тип
+	//Р—Р°РїРёС€РµРј РµРµ С‚РёРї
 	CreatedNode->idtype = inttype;
-	//Создадим значение в ней
+	//РЎРѕР·РґР°РґРёРј Р·РЅР°С‡РµРЅРёРµ РІ РЅРµР№
 	CreatedNode->casenode.constvalue.intval = 32767;
 
-	//Далее все аналогично операциям с Integer
+	//Р”Р°Р»РµРµ РІСЃРµ Р°РЅР°Р»РѕРіРёС‡РЅРѕ РѕРїРµСЂР°С†РёСЏРј СЃ Integer
 	SearchInTable("char");
 	localscope->firstlocal = newident(localscope->firstlocal, hashresult, addrname, TYPES);
 	CreatedNode->idtype = chartype;
@@ -1651,7 +1651,7 @@ TYPEREC* composed (unsigned *followers)
 	CreatedNode->idtype = NULL;
 	CreatedNode->casenode.proc.io = 4;
 
-	//Фиктивная область создана. Теперь откроем область 
+	//Р¤РёРєС‚РёРІРЅР°СЏ РѕР±Р»Р°СЃС‚СЊ СЃРѕР·РґР°РЅР°. РўРµРїРµСЂСЊ РѕС‚РєСЂРѕРµРј РѕР±Р»Р°СЃС‚СЊ 
 	open_scope();
 	output=fopen("output.asm","w");
     fprintf(output,"extern printf\n");
@@ -1662,7 +1662,7 @@ TYPEREC* composed (unsigned *followers)
     fprintf(output,"extern malloc\n");
     fprintf(output,"extern memcpy\n");
     fprintf(output,"extern free\n\n");
-	//Начало проверки
+	//РќР°С‡Р°Р»Рѕ РїСЂРѕРІРµСЂРєРё
 	accept (programsy);
 	accept (ident);
 	accept (semicolon);
@@ -1678,4 +1678,4 @@ TYPEREC* composed (unsigned *followers)
 	else remove("output.asm");
 	accept(point);
 	while (ch!=endoffile) ch=nextch();
- }
+ }п»ї

@@ -1,22 +1,22 @@
 
 /*
-			Файл ERROR.C - занесение
-		   cведений об ошибке в список ошибок
+			Р¤Р°Р№Р» ERROR.C - Р·Р°РЅРµСЃРµРЅРёРµ
+		   cРІРµРґРµРЅРёР№ РѕР± РѕС€РёР±РєРµ РІ СЃРїРёСЃРѕРє РѕС€РёР±РѕРє
 */
 
 
-#include <stdio.h>	 /* отладка					*/
+#include <stdio.h>	 /* РѕС‚Р»Р°РґРєР°					*/
 #include <stdlib.h>
-extern struct textposition token;			/* тек. лексема */
-extern short ErrInx, ErrorOverflow;			/* счетчики ошибок */
+extern struct textposition token;			/* С‚РµРє. Р»РµРєСЃРµРјР° */
+extern short ErrInx, ErrorOverflow;			/* СЃС‡РµС‚С‡РёРєРё РѕС€РёР±РѕРє */
 //extern unsigned nocode;
-struct E Errlist[ ERRMAX ];      			/* список ошибок */
+struct E Errlist[ ERRMAX ];      			/* СЃРїРёСЃРѕРє РѕС€РёР±РѕРє */
 
-void Error (unsigned errorcode)   /* занесение ошибки в список */
+void Error (unsigned errorcode)   /* Р·Р°РЅРµСЃРµРЅРёРµ РѕС€РёР±РєРё РІ СЃРїРёСЃРѕРє */
 {
 	
   if ( ErrInx == ERRMAX )
-  ErrorOverflow=1;  /* истина */
+  ErrorOverflow=1;  /* РёСЃС‚РёРЅР° */
   else {
     ++ ErrInx;
     Errlist[ ErrInx ].errorcode = errorcode;

@@ -1,5 +1,5 @@
 
-		   /* ‘¿…À "HASH.C" - ’›ÿ-‘”Õ ÷»ﬂ */
+		   /* –§–ê–ô–õ "HASH.C" - –•–≠–®-–§–£–ù–ö–¶–ò–Ø */
 hash(name)
 char *name;
 {
@@ -8,4 +8,4 @@ char *name;
    while( name[i]!=0 ) result+=name[i++]|i;
    return(abs( result%997 ));
 }
-
+Ôªø

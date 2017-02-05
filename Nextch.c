@@ -1,7 +1,7 @@
 
 /*
-			Блок ввода - вывода
-			   Файл NEXTCH.C
+			Р‘Р»РѕРє РІРІРѕРґР° - РІС‹РІРѕРґР°
+			   Р¤Р°Р№Р» NEXTCH.C
 */
 #include <stdio.h>
 #include <string.h>
@@ -10,90 +10,90 @@
 extern FILE *t;
 
 extern struct E Errlist[ ERRMAX ];
-static int printed;		/* номер последней напечатанной строки  */
-int    lineindex,	/* индекс текущей литеры в массиве line */
-       indent;   	/* отступ выдачи текущей строки (для табуляции) */
+static int printed;		/* РЅРѕРјРµСЂ РїРѕСЃР»РµРґРЅРµР№ РЅР°РїРµС‡Р°С‚Р°РЅРЅРѕР№ СЃС‚СЂРѕРєРё  */
+int    lineindex,	/* РёРЅРґРµРєСЃ С‚РµРєСѓС‰РµР№ Р»РёС‚РµСЂС‹ РІ РјР°СЃСЃРёРІРµ line */
+       indent;   	/* РѕС‚СЃС‚СѓРї РІС‹РґР°С‡Рё С‚РµРєСѓС‰РµР№ СЃС‚СЂРѕРєРё (РґР»СЏ С‚Р°Р±СѓР»СЏС†РёРё) */
 
 
 
-int ReadNextLine ()      /* чтение следующей строки исходного файла */
+int ReadNextLine ()      /* С‡С‚РµРЅРёРµ СЃР»РµРґСѓСЋС‰РµР№ СЃС‚СЂРѕРєРё РёСЃС…РѕРґРЅРѕРіРѕ С„Р°Р№Р»Р° */
 { char *result;
-  indent=0; 		/* сдвига табуляции нет */
-  result = fgets( line, MAXLEN, srcfile );	/* прочтем строку */
-  positionnow.linenumber++;			/* прибавим N строки */
+  indent=0; 		/* СЃРґРІРёРіР° С‚Р°Р±СѓР»СЏС†РёРё РЅРµС‚ */
+  result = fgets( line, MAXLEN, srcfile );	/* РїСЂРѕС‡С‚РµРј СЃС‚СЂРѕРєСѓ */
+  positionnow.linenumber++;			/* РїСЂРёР±Р°РІРёРј N СЃС‚СЂРѕРєРё */
 
-if(feof(srcfile) || result == NULL || line == NULL ||  result==0)		/* если достигнут конец файла */
+if(feof(srcfile) || result == NULL || line == NULL ||  result==0)		/* РµСЃР»Рё РґРѕСЃС‚РёРіРЅСѓС‚ РєРѕРЅРµС† С„Р°Р№Р»Р° */
      {    
-   fprintf( dstfile, "\nКoмпиляция окончена: ошибок");
+   fprintf( dstfile, "\nРљoРјРїРёР»СЏС†РёСЏ РѕРєРѕРЅС‡РµРЅР°: РѕС€РёР±РѕРє");
    if ( ErrorCount == 0 )
-      fprintf( dstfile, " нет !\n");
+      fprintf( dstfile, " РЅРµС‚ !\n");
       else fprintf( dstfile, " - %3d !\n",ErrorCount );
 
    fclose( srcfile );
    fclose( dstfile );
    return( endoffile );
-} 			/* сообщим об этом */
+} 			/* СЃРѕРѕР±С‰РёРј РѕР± СЌС‚РѕРј */
   LastInLine = strlen( line );
   if( line[ LastInLine-1 ]=='\n' )
-     line[ LastInLine-1 ]=' ';  		/* удалить \n */
+     line[ LastInLine-1 ]=' ';  		/* СѓРґР°Р»РёС‚СЊ \n */
 
-  positionnow.charnumber = lineindex = 0;     	/* тек. символ = 0 */
-  return( 0 );                        /* все нормально */
+  positionnow.charnumber = lineindex = 0;     	/* С‚РµРє. СЃРёРјРІРѕР» = 0 */
+  return( 0 );                        /* РІСЃРµ РЅРѕСЂРјР°Р»СЊРЅРѕ */
 }
 
-void ListErrors () /* печать сообщений об ошибках */
+void ListErrors () /* РїРµС‡Р°С‚СЊ СЃРѕРѕР±С‰РµРЅРёР№ РѕР± РѕС€РёР±РєР°С… */
 { short k,l;
   if( (ErrorCount+ErrInx) > 99 ) {
-     fputs("***** Слишком много ошибок в программе !", dstfile);
-     fprintf(dstfile, "\nКомпиляция окончена : ошибок - %d !\n", ErrorCount );
+     fputs("***** РЎР»РёС€РєРѕРј РјРЅРѕРіРѕ РѕС€РёР±РѕРє РІ РїСЂРѕРіСЂР°РјРјРµ !", dstfile);
+     fprintf(dstfile, "\nРљРѕРјРїРёР»СЏС†РёСЏ РѕРєРѕРЅС‡РµРЅР° : РѕС€РёР±РѕРє - %d !\n", ErrorCount );
      exit(0);
   }
   ErrorCount += ErrInx;
 
-     /* ----- Печать ошибок (в цикле по k) ----- */
+     /* ----- РџРµС‡Р°С‚СЊ РѕС€РёР±РѕРє (РІ С†РёРєР»Рµ РїРѕ k) ----- */
   for( k=1; k <= ErrInx; ++k ) {
     fprintf( dstfile, "**%.2d**", ErrorCount - ErrInx + k );
-	 /* ----- установка указателя в нужную позицию ----- */
+	 /* ----- СѓСЃС‚Р°РЅРѕРІРєР° СѓРєР°Р·Р°С‚РµР»СЏ РІ РЅСѓР¶РЅСѓСЋ РїРѕР·РёС†РёСЋ ----- */
        for( l=1; l < (Errlist[  k ].errorposition.charnumber-indent); l++ )
 	  fprintf( dstfile, " ");
-       fprintf( dstfile, "^ ошибка код %4d \n",Errlist[ k ].errorcode );
-	 /* ----- печать текста сообщения об ошибке ----- */
+       fprintf( dstfile, "^ РѕС€РёР±РєР° РєРѕРґ %4d \n",Errlist[ k ].errorcode );
+	 /* ----- РїРµС‡Р°С‚СЊ С‚РµРєСЃС‚Р° СЃРѕРѕР±С‰РµРЅРёСЏ РѕР± РѕС€РёР±РєРµ ----- */
     if(( Errlist[ k ].errorcode < 0 )||( Errlist[ k ].errorcode > MAXMES ))
-       fputs( "****** Номер сообщения вне допустимых пределов !\n", dstfile );
+       fputs( "****** РќРѕРјРµСЂ СЃРѕРѕР±С‰РµРЅРёСЏ РІРЅРµ РґРѕРїСѓСЃС‚РёРјС‹С… РїСЂРµРґРµР»РѕРІ !\n", dstfile );
     else if( messages[Errlist[k].errorcode]==NULL )
-       fputs( "****** Такого сообщения нет в файле данных !\n", dstfile );
+       fputs( "****** РўР°РєРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ РЅРµС‚ РІ С„Р°Р№Р»Рµ РґР°РЅРЅС‹С… !\n", dstfile );
 	  else {fprintf( dstfile, "****** %s\n", messages[ Errlist[ k ].errorcode ] );
 //printf("%d %s\n",Errlist[ k ].errorcode,messages[Errlist[ k ].errorcode]);
 }
   }
 
   if( ErrorOverflow )
-    fprintf( dstfile, "***** Слишком много ошибок в этой строке ! \n");
+    fprintf( dstfile, "***** РЎР»РёС€РєРѕРј РјРЅРѕРіРѕ РѕС€РёР±РѕРє РІ СЌС‚РѕР№ СЃС‚СЂРѕРєРµ ! \n");
   ErrInx=0;
   ErrorOverflow=FALSE;
 }
 
-void ListThisLine ()   /* печать строки */
+void ListThisLine ()   /* РїРµС‡Р°С‚СЊ СЃС‚СЂРѕРєРё */
 { if( positionnow.linenumber==printed ) return;
   printed=positionnow.linenumber;
   fprintf( dstfile, "%4d  ", positionnow.linenumber);
   fprintf( dstfile, "%s\n", line );
   if( ErrInx ) ListErrors();
 }
-char nextch () /* взятие следующего символа */
+char nextch () /* РІР·СЏС‚РёРµ СЃР»РµРґСѓСЋС‰РµРіРѕ СЃРёРјРІРѕР»Р° */
 {
   if( lineindex == LastInLine ) {
     ListThisLine() ;  
 int i=ReadNextLine();   
-printf("%d",i);           	/* печать текущей строки */
-    if( i == endoffile ) {	/* чтение следующей строки */
+printf("%d",i);           	/* РїРµС‡Р°С‚СЊ С‚РµРєСѓС‰РµР№ СЃС‚СЂРѕРєРё */
+    if( i == endoffile ) {	/* С‡С‚РµРЅРёРµ СЃР»РµРґСѓСЋС‰РµР№ СЃС‚СЂРѕРєРё */
        ch=endoffile;return( ch);
     }
   }
   if((ch=line[ lineindex++ ])==9) {
      indent=6;
-     positionnow.charnumber=((positionnow.charnumber+8)/8)*8;  /* табуляция */
+     positionnow.charnumber=((positionnow.charnumber+8)/8)*8;  /* С‚Р°Р±СѓР»СЏС†РёСЏ */
   }
-  else positionnow.charnumber++;   /* любой другой символ */
+  else positionnow.charnumber++;   /* Р»СЋР±РѕР№ РґСЂСѓРіРѕР№ СЃРёРјРІРѕР» */
   return( ch );
-}
+}п»ї
