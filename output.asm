@@ -9,11 +9,13 @@ extern memcpy
 extern free
 
 section .data
-int_format dd "%d", 10, 0
-str_format dd "%s", 10, 0
+int_format_s_n dd "%d", 10, 0
+int_format_p_n db "%d", 10, 0
+int_format_s dd "%d", 0
+int_format_p db "%d", 0
 section .bss
-l: resd 1
 b: resd 1
+i: resd 1
 a: resd 1
 section .text
 global main
@@ -21,23 +23,58 @@ global main
 f:
 push ebp
 mov ebp, esp
-push dword c
+push dword 3
+pop eax
+mov [ebp + 24], eax
+push dword 0
+pop eax
+mov [ebp + 20], eax
+L6:
+push dword [ebp + 12]
+push dword 3
 pop ebx
 pop eax
+imul ebx
+push eax
+pop eax
+mov [ebp + 12], eax
+push dword [ebp + 20]
 push dword 1
-pop ebx
-pop eax
 pop ebx
 pop edx
 add edx, ebx
 mov eax, edx
 push eax
 pop eax
-mov f, eax
-sub esp, 8
+mov [ebp + 20], eax
+push dword [ebp + 20]
+push int_format_p_n
+call printf
+add esp, 8
+push dword [ebp + 20]
+push dword 3
+pop ebx
+pop edx
+cmp edx, ebx
+jae L17
+mov eax, 0
+jmp L18
+L17:
+mov eax, 1
+L18:
+push eax
+pop eax
+cmp eax, 1
+jne L6
+push dword [ebp + 12]
+pop eax
+push dword 4
+pop eax
+sub esp, 12
 mov esp, ebp
 pop ebp
-ret
+ret 8
+
 main:
 push ebp
 mov ebp, esp
@@ -45,69 +82,23 @@ sub esp, 20
 pusha
 lea ebx, [ebp - 4]
 push ebx
-push int_format
+push int_format_s
 call scanf
 add esp, 8
 popa
-push dword a
-pop ebx
+push dword 0
 pop eax
-push dword 10
-pop ebx
-pop eax
-pop ebx
-pop edx
-cmp edx, ebx
-jb L8
-mov eax, 0
-jmp L9
-L8:
-mov eax, 1
-L9:
-push eax
-pop eax
-cmp eax, 1
-jne L7
-L8:
-push dword a
-pop ebx
-pop eax
+mov [ebp - 8], eax
+push dword [ebp - 4]
+push dword [ebp - 12]
 call f
 push eax
-pop ebx
 pop eax
-pop eax
-mov a, eax
-pop eax
-cmp eax, 1
-je L8
-L7:
-push dword a
-pop ebx
-pop eax
-push dword 10
-pop ebx
-pop eax
-pop ebx
-pop edx
-cmp edx, ebx
-ja L9
-mov eax, 0
-jmp L10
-L9:
-mov eax, 1
-L10:
-push eax
-pop eax
-cmp eax, 1
-jne L8
-push dword a
-pop ebx
-pop eax
-push int_format
+mov [ebp - 4], eax
+push dword [ebp - 4]
+push int_format_p_n
 call printf
 add esp, 8
-L8:
 mov esp, ebp
 pop ebp
 ret
