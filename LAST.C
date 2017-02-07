@@ -338,7 +338,7 @@ void newvariable()
 };
 
 //Это как раз приписывание типа всем переменным, ожидающим в очереди
-void addattributes()
+void addattributes(int flag)
 {
 	 struct listrec *listentry, *oldentry;
 	 listentry = varlist;
@@ -352,7 +352,7 @@ void addattributes()
 			bssSection(listentry->id_r);
 		 
 		}
-		else  
+		else  if (flag)
 			listentry->id_r->casenode.vars.offset=-(listentry->id_r->casenode.vars.offset);
 		 oldentry = listentry;
 		 listentry = listentry->next;
@@ -488,7 +488,7 @@ void addattributes()
 		}
 		accept(colon);
 		vartype = type(followers); //Узнаем тип всех этих переменных
-		addattributes(); //Присваиваем всем им этот тип
+		addattributes(1); //Присваиваем всем им этот тип
 
 		if (!belong (symbol, followers))
 		{
@@ -637,7 +637,7 @@ void groupofparam(unsigned *followers)
 		accept(colon);
 		SetDisjunct(af_sameparam,followers,ptra);//rightpar,semicolon,eolint
 		vartype = type(ptra);
-		addattributes();
+		addattributes(0);
 		addpartyp();
 		if(!belong(symbol,followers)){
 			Error(7);
@@ -961,7 +961,7 @@ void procfuncpart(unsigned *followers)
 							if (localscope->level==1)
 								fprintf(output,"lea ebx, [ebp - %d]\n", Ident->casenode.vars.offset);
 							else
-								fprintf(output,"lea ebx, [ebp + %d]\n", -Ident->casenode.vars.offset+localscope->count_locals-localscope->localvar);
+								fprintf(output,"lea ebx, [ebp + %d]\n", -Ident->casenode.vars.offset+localscope->count_locals-localscope->localvar+8);
 							fprintf(output,"push ebx\n");
 							fprintf(output,"push int_format_s\n");
 							fprintf(output,"call scanf\n");
@@ -1008,7 +1008,7 @@ void procfuncpart(unsigned *followers)
 							if (localscope->level==1)
 								fprintf(output,"lea ebx, [ebp - %d]\n", Ident->casenode.vars.offset);
 							else
-								fprintf(output,"lea ebx, [ebp + %d]\n", -Ident->casenode.vars.offset+localscope->count_locals-localscope->localvar);
+								fprintf(output,"lea ebx, [ebp + %d]\n", -Ident->casenode.vars.offset+localscope->count_locals-localscope->localvar+8);
 							fprintf(output,"push ebx\n");
 							fprintf(output,"push int_format_s_n\n");
 							fprintf(output,"call scanf\n");
@@ -1387,7 +1387,7 @@ void procfuncpart(unsigned *followers)
 						if (localscope->level==1)
 							fprintf(output,"mov [ebp - %d], eax\n",Ident->casenode.vars.offset);
 						else
-							fprintf(output,"mov [ebp + %d], eax\n",-Ident->casenode.vars.offset+localscope->count_locals-localscope->localvar);
+							fprintf(output,"mov [ebp + %d], eax\n",-Ident->casenode.vars.offset+localscope->count_locals-localscope->localvar+8);
 					 //fprintf(output,"push dword, [ebp - %d]\n", Ident->casenode.vars.offset);
 				 }
 			 }
@@ -1594,7 +1594,7 @@ int right_sign(TYPEREC* exptype)
 					if (localscope->level==1)
 						fprintf(output,"push dword [ebp - %d]\n", node->casenode.vars.offset);
 					else
-						fprintf(output,"push dword [ebp + %d]\n", -node->casenode.vars.offset+localscope->count_locals-localscope->localvar);
+						fprintf(output,"push dword [ebp + %d]\n", -node->casenode.vars.offset+localscope->count_locals-localscope->localvar+8);
 					//fprintf(output,"push dword %s\n", node->idname);
 				break;
 			case CONSTS:
@@ -1666,7 +1666,6 @@ int right_sign(TYPEREC* exptype)
             break;
         case star: 
 			fprintf(output,"imul ebx\n");
-				break;
 			break;
         case slash :  
             fprintf(output,"mov edx, 0\n");
@@ -1853,11 +1852,8 @@ TYPEREC* composed (unsigned *followers)
 	accept (programsy);
 	accept (ident);
 	accept (semicolon);
-
 	block (blockfol);
-	
 	accept(point);
-
 	if (!nocode)
 	{
 		fprintf(output,"mov esp, ebp\n");
