@@ -20,19 +20,10 @@ int ReadNextLine ()      /* чтение следующей строки исх�
 { char *result;
   indent=0; 		/* сдвига табуляции нет */
   result = fgets( line, MAXLEN, srcfile );	/* прочтем строку */
-  positionnow.linenumber++;			/* прибавим N строки */
+  ++positionnow.linenumber;			/* прибавим N строки */
 
-if(feof(srcfile) || result == NULL || line == NULL ||  result==0)		/* если достигнут конец файла */
-     {    
-   fprintf( dstfile, "\nКoмпиляция окончена: ошибок");
-   if ( ErrorCount == 0 )
-      fprintf( dstfile, " нет !\n");
-      else fprintf( dstfile, " - %3d !\n",ErrorCount );
-
-   fclose( srcfile );
-   fclose( dstfile );
-   return( endoffile );
-} 			/* сообщим об этом */
+if(result == NULL || line == NULL)		/* если достигнут конец файла */
+     { return( 1 );} 			/* сообщим об этом */
   LastInLine = strlen( line );
   if( line[ LastInLine-1 ]=='\n' )
      line[ LastInLine-1 ]=' ';  		/* удалить \n */
@@ -63,7 +54,6 @@ void ListErrors () /* печать сообщений об ошибках */
     else if( messages[Errlist[k].errorcode]==NULL )
        fputs( "****** Такого сообщения нет в файле данных !\n", dstfile );
 	  else {fprintf( dstfile, "****** %s\n", messages[ Errlist[ k ].errorcode ] );
-//printf("%d %s\n",Errlist[ k ].errorcode,messages[Errlist[ k ].errorcode]);
 }
   }
 
@@ -73,20 +63,22 @@ void ListErrors () /* печать сообщений об ошибках */
   ErrorOverflow=FALSE;
 }
 
-void ListThisLine ()   /* печать строки */
-{ if( positionnow.linenumber==printed ) return;
+int ListThisLine ()   /* печать строки */
+{ if( positionnow.linenumber==printed ) return 0;
   printed=positionnow.linenumber;
   fprintf( dstfile, "%4d  ", positionnow.linenumber);
   fprintf( dstfile, "%s\n", line );
   if( ErrInx ) ListErrors();
+return 0;
 }
-char nextch () /* взятие следующего символа */
+
+int nextch () /* взятие следующего символа */
 {
   if( lineindex == LastInLine ) {
     ListThisLine() ;  
-int i=ReadNextLine();   
-printf("%d",i);           	/* печать текущей строки */
-    if( i == endoffile ) {	/* чтение следующей строки */
+    int i=ReadNextLine();   
+           	/* печать текущей строки */
+    if( i ) {	/* чтение следующей строки */
        ch=endoffile;return( ch);
     }
   }
@@ -96,4 +88,4 @@ printf("%d",i);           	/* печать текущей строки */
   }
   else positionnow.charnumber++;   /* любой другой символ */
   return( ch );
-}﻿
+}

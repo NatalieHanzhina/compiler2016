@@ -1,25 +1,22 @@
 #include <stdlib.h>
 #include <stdio.h>
-
-#include "string.h"
-/*Описание переменных простых типов. Выражения. Операторы: условный, составной, цикла*/
+/*Описание переменных простых типов. Анализ выражения. Операторы: условный, выбора, составной, цикла с параметром*/
 
 #define TYPES      121   /* ТИП */
 #define CONSTS     122   /* КОНСТАНТА */
 #define VARS       123   /* ПЕРЕМЕННАЯ */
 #define PROCS      124   /* ПРОЦЕДУРА */
 #define FUNCS      125   /* ФУНКЦИЯ   */
-/////////////////////code generation//////////////////////////////////////////////////////////////////////
 typedef struct typerec TYPEREC;
 int labelCounter=0;
-
 #define REFERENCE 1 /*локальная переменная или параметр-значение*/
 #define REGISTER  2 /* регистр */
 #define CONSTANT  3 /* непосредственное данное */
 #define REF_VAR   4 /* переменная, переданная по ссылке */
 
-unsigned nocode=0;
+unsigned nocode;
 FILE *output;
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 extern void Error(unsigned);
@@ -29,6 +26,8 @@ union const_val /* значение константы */
 {
 	int intval      /* целого  или символьного типа */ ;
 	int boolval;
+//	float realval   /* вещественного типа */ ;
+//	char *charval   /* перечислимого типа ( адрес в таблице имен ) */;
 };
 
 struct idparam
@@ -56,11 +55,13 @@ struct treenode
 			struct idparam *param /* указатель  на информацию о параметрах */;
 			int forw /* информация об опережающем описании */;
 			int io; /*1-read, 2-readln, 3-write, 4-writeln*/
+            //int count_locals /* размер области данных процедуры (функции) */;
+           // int begin_code /* указатель на начало кода */;
         } proc;
 		struct
 		{ 
 			unsigned staticlevel;
-			unsigned offset;
+			int offset;
 			unsigned param_var /* =TRUE,  если переменная является параметром, переданным по ссылке */;
 		} vars;
 	} casenode;
@@ -70,24 +71,26 @@ struct treenode
 }*CreatedNode = NULL, *LocalTree = NULL;
 typedef struct treenode NODE;
 //Структура дескриптора типа:
-union variapart 
+union variapart   /*вариантная часть дескриптора*/
 { 
-	TYPEREC  *basetype;
-        /* для перечислимого типа */
+		TYPEREC  *basetype; /* указатель на базовый тип */
         struct reestrconsts  *firstconst;  /* указатель на первый элемент списка констант */
 
-};  /* end of union variant */
+};  
 
 struct reestrconsts  /* структура элемента списка констант перечислительного типа*/
 {
 	char *addrconsts; /* адрес индентификатора в таблице имен */
 	struct reestrconsts *next; /* указатель  на следующую структуру*/
 };
+
+
+
 struct typerec
 {
 	struct typerec *next;  /* указатель на следующий дескриптор типа */
 	unsigned typecode;  /* код типа */
-	union variapart casetype;
+	union variapart casetype;  /* вариантная часть дескриптора */
 } *booltype, *inttype, *chartype, *stringtype, *vartype, *ConstantType = NULL;
 
 //Это структура-описатель области действия localscope
@@ -98,6 +101,7 @@ struct scope
 	struct scope *enclosingscope;
 	int count_locals /* размер области данных */;
 	int level;
+	int localvar;
 } *localscope;
 typedef struct scope SCOPE;
 int level=0;
@@ -111,6 +115,7 @@ void open_scope()
 	newscope->enclosingscope = localscope;
 	newscope->count_locals=0;
 	newscope->level=level++;
+	newscope->localvar=0;
 	localscope = newscope;	
 };
 void dispose_types( TYPEREC* Item ) { /* Удаление Таблицы Типов */
@@ -121,7 +126,6 @@ void dispose_types( TYPEREC* Item ) { /* Удаление Таблицы Тип�
      free( (char*) PrevItem);
    };
 };
-
 void dispose_ids(struct treenode* Root) { /* Удаление Таблицы Идентификаторов */
    if(Root!=NULL)
    { dispose_ids(Root->leftlink); 
@@ -147,13 +151,9 @@ TYPEREC *newtype(int tcode)
 	struct typerec *new1;
 	new1 = (struct typerec*)malloc(sizeof(struct typerec));
 	new1->typecode = tcode;
-	new1->next = localscope->typechain;
-	//Вставляем вершину в список. В зависимости от типа настраиваем начальные значения
-	
+	new1->next = localscope->typechain;	
 	switch (new1->typecode)
 	{
-		//case LIMITEDS:
-		//	new1->casetype.basetype = NULL;
 		case SCALARS:
 			break;
 		case ENUMS:
@@ -216,6 +216,7 @@ NODE *newident(NODE *Tree,unsigned hashfunc,char *addrname,int classused)
 			Tree->hashvalue = hashfunc;
 			Tree->clas = classused;
 			Tree->idname = addrname;
+			
 			Tree->casenode.vars.offset=localscope->count_locals+INT_LENGTH;
 			localscope->count_locals+=INT_LENGTH;
 			Tree->leftlink = NULL;
@@ -299,7 +300,7 @@ NODE *SearchIdent (SCOPE* local,char *addrname,unsigned hashfunc)
 		//Возвращаем ссылку на этот идентификатор
 		return Tree;
 }
-/*void bssSection(NODE* tree)
+void bssSection(NODE* tree)
  {
 	 //char* str=(char*)malloc( sizeof(*byte2) * 100 );
 		if (tree != NULL)
@@ -317,7 +318,7 @@ NODE *SearchIdent (SCOPE* local,char *addrname,unsigned hashfunc)
 					bssSection(tree->leftlink) ;				
 			}
 		}	 
- }*/
+ }
 //Заносит новую переменную в список переменных, ожидающих указанмя типа
 //(когда в vardeclaration описали все переменные, а тип - тока в конце написан
 //тогда все они заносятся в очередь и в конце получают тип
@@ -348,10 +349,11 @@ void addattributes()
 		if (localscope->level==1)
 		{
 		 if (!nocode)
-			//bssSection(listentry->id_r);
-			fprintf(output,"%s: resd 1\n",listentry->id_r->idname);
-		 //else fclose(output);
+			bssSection(listentry->id_r);
+		 
 		}
+		else  
+			listentry->id_r->casenode.vars.offset=-(listentry->id_r->casenode.vars.offset);
 		 oldentry = listentry;
 		 listentry = listentry->next;
 		 //Очищаем элемент очереди после того, как дописали
@@ -368,17 +370,12 @@ void addattributes()
 	return 0;
  }
 
-////////////////
-//Главная часть
-////////////////
- 
 //Объявления 
  TYPEREC* simpletype();
  TYPEREC* arraytype();
  TYPEREC* expression ();
  void operatore();
  TYPEREC* SimpleExpression();
-//Фунцкии
 
  //Функция IsConstant возвращает 1, если символ - числовая константа.
  //Иначе возвращает 0. В переменную COnstantType заносится ссылка на дескриптор типа константы.
@@ -414,7 +411,7 @@ void addattributes()
 		skipto2(st_typ, followers);
 		nocode=1;
 	}
-	//Иначе ссылку на дескриптор простого типа
+	////возвращаем  ссылку на дескриптор простого типа
 	else TypeEntry = simpletype (followers);
 
 	if (!belong (symbol, followers))
@@ -441,13 +438,12 @@ void addattributes()
 	 }
 	 //Синтаксический и семантический анализ
 	 if (symbol == ident) 
-	 //Либо это уже известный тип, либо ограниченный
-	 //Пример: integer - ident. Или a..b - ограниченный. Тоже начинается с ident.
 	 {
 		 //Находим этот идентификатор в нашей таблице
 		 Ident = SearchIdent(localscope, addrname, hashresult);
 		 if (Ident==NULL) {Error(104);nocode=1;}
 		 nextsym ();
+			 //Если это просто идентификатор
 			 if ((Ident != NULL) && (Ident->clas != TYPES))
 			 {
 				 Error(100);
@@ -458,7 +454,6 @@ void addattributes()
 		 else TypeEntry = NULL;
 
 	 }
-	 
 	 //Нейтрализация синтаксических ошибок
 	 if (!belong (symbol, followers))
 	 {
@@ -482,12 +477,14 @@ void addattributes()
 	{
 		varlist = NULL; //Инициализируем очередь переменных, ожидающих тип
 		newvariable();  //Вносим туда текущую переменную
+		localscope->localvar+=4;
 		nextsym();
 		while (symbol == comma)
 		{
 			nextsym();
 			newvariable(); //Вносим переменные в список ожидания
 			accept(ident);
+			localscope->localvar+=4;
 		}
 		accept(colon);
 		vartype = type(followers); //Узнаем тип всех этих переменных
@@ -572,8 +569,7 @@ void addattributes()
 		 }
 	 }
 
-	//else
-	//	fclose(output);
+
 	
  }
 int varval;
@@ -705,7 +701,23 @@ void procfuncpart(unsigned *followers)
 			switch(symbol)
 			{
 			case functionsy:
+				//nextsym();
+				//if(!belong(symbol,idstarters))
+				//{
+				//	Error(2);
+				//	skipto2(idstarters,followers);
+				//}
+				//if(symbol==ident)
+				//{
+				//	nextsym();
+				//}
 				accept(functionsy);
+				//Ident = SearchIdent(localscope, addrname, hashresult);	
+				//if (Ident!=NULL)
+				//	if (Ident->casenode.proc.forw)
+				//		typevar = (Ident->idtype);
+				//	else Error(101);
+				//else
 				{
 					localscope->firstlocal=newident(localscope->firstlocal, hashresult,addrname,FUNCS);
 					if (!nocode)
@@ -713,13 +725,14 @@ void procfuncpart(unsigned *followers)
 						fprintf(output, "\n%s:\n",addrname);
 						fprintf(output,"push ebp\n");
 						fprintf(output,"mov ebp, esp\n");
-					}				
+					}					
 					LocalTree=CreatedNode;
 					if (LocalTree->casenode.proc.forw!=1)
 					{
 						CreatedNode->casenode.proc.param=NULL;
 						CreatedNode->idtype=NULL;//????
 						open_scope();
+						//ent=newident(hashresult,addrname,VARS); ????
 						accept(ident);
 						funclistend=NULL;
 						SetDisjunct(af_funclistparam,followers,ptra);
@@ -779,9 +792,7 @@ void procfuncpart(unsigned *followers)
 					fprintf(output, "%s:\n",addrname);
 					fprintf(output,"push ebp\n");
 					fprintf(output,"mov ebp, esp\n");
-				}
-				//else
-				//	fclose(output);				
+				}			
 				LocalTree=CreatedNode;
 				if (LocalTree->casenode.proc.forw!=1)
 				{
@@ -840,10 +851,13 @@ void procfuncpart(unsigned *followers)
 					block(ptra);
 					if (!nocode)
 					{
-						fprintf(output,"sub esp, %d\n",  localscope->count_locals + 4);
+						fprintf(output,"sub esp, %d\n",  localscope->localvar + 4);
 						fprintf(output,"mov esp, ebp\n");
 						fprintf(output,"pop ebp\n");
-						fprintf(output,"ret\n");
+						if (localscope->count_locals)
+							fprintf(output,"ret %d\n",localscope->count_locals-localscope->localvar);
+						else
+							fprintf(output,"ret\n");
 					}
 					accept(semicolon);
 				}
@@ -869,13 +883,15 @@ void procfuncpart(unsigned *followers)
 		if (localscope->level==1)
 		{
 			fprintf(output,"section .data\n");
-			fprintf(output,"int_format dd \"%%d\", 10, 0\n");
-			fprintf(output,"str_format dd \"%%s\", 10, 0\n");
+			fprintf(output,"int_format_s_n dd \"%%d\", 10, 0\n");
+			fprintf(output,"int_format_p_n db \"%%d\", 10, 0\n");
+			fprintf(output,"int_format_s dd \"%%d\", 0\n");
+			fprintf(output,"int_format_p db \"%%d\", 0\n");
 			fprintf(output,"section .bss\n");
 		}
 	}
 	SetDisjunct(followers, begpart, ptra);
-	varpart (begpart); 
+	varpart (begpart); //ptra?????
 	if (!nocode)
 	{
 		if (localscope->level==1)
@@ -890,7 +906,7 @@ void procfuncpart(unsigned *followers)
 	{
 		if (localscope->level==1)
 		{
-			fprintf(output,"main:\n");
+			fprintf(output,"\nmain:\n");
 			fprintf(output,"push ebp\n");
 			fprintf(output,"mov ebp, esp\n");
 			fprintf(output,"sub esp, %d\n", localscope->count_locals + 4);
@@ -911,13 +927,13 @@ void procfuncpart(unsigned *followers)
 	switch (io)
 	{
 		case 1://read
-		case 2://readln
 			if (symbol == leftpar)
 			{
 			//	accept(leftpar);
 				 do
 				 {
 					nextsym();
+					// typevar = variable(ptra);
 				
 					Ident = SearchIdent(localscope, addrname, hashresult);	
 					if (Ident==NULL && !(symbol==intc || symbol==charc || symbol==stringc)) 
@@ -942,9 +958,59 @@ void procfuncpart(unsigned *followers)
 						if (!nocode)
 						{
 							fprintf(output,"pusha\n");
-							fprintf(output,"lea ebx, [ebp - %d]\n", Ident->casenode.vars.offset);
+							if (localscope->level==1)
+								fprintf(output,"lea ebx, [ebp - %d]\n", Ident->casenode.vars.offset);
+							else
+								fprintf(output,"lea ebx, [ebp + %d]\n", -Ident->casenode.vars.offset+localscope->count_locals-localscope->localvar);
 							fprintf(output,"push ebx\n");
-							fprintf(output,"push int_format\n");
+							fprintf(output,"push int_format_s\n");
+							fprintf(output,"call scanf\n");
+							fprintf(output,"add esp, 8\n");
+							fprintf(output,"popa\n");
+						}
+				 } while (symbol == comma);
+		//		 accept(rightpar);
+			}
+			//accept(semicolon);
+			break;
+		case 2://readln
+			if (symbol == leftpar)
+			{
+			//	accept(leftpar);
+				 do
+				 {
+					nextsym();
+					// typevar = variable(ptra);
+				
+					Ident = SearchIdent(localscope, addrname, hashresult);	
+					if (Ident==NULL && !(symbol==intc || symbol==charc || symbol==stringc)) 
+					{
+						Error(104);
+						nocode=1;
+					}
+					if (symbol==intc || symbol==charc || symbol==stringc)
+					{
+						Error(6);
+						nocode=1;
+					}
+					//else
+					nextsym();
+					if(symbol!=comma)
+						if(symbol!=rightpar)
+						{
+							Error(6);
+							skipto1(af_factparam);
+							nocode=1;
+						}
+						if (!nocode)
+						{
+							fprintf(output,"pusha\n");
+							if (localscope->level==1)
+								fprintf(output,"lea ebx, [ebp - %d]\n", Ident->casenode.vars.offset);
+							else
+								fprintf(output,"lea ebx, [ebp + %d]\n", -Ident->casenode.vars.offset+localscope->count_locals-localscope->localvar);
+							fprintf(output,"push ebx\n");
+							fprintf(output,"push int_format_s_n\n");
 							fprintf(output,"call scanf\n");
 							fprintf(output,"add esp, 8\n");
 							fprintf(output,"popa\n");
@@ -955,7 +1021,6 @@ void procfuncpart(unsigned *followers)
 			//accept(semicolon);
 			break;
 		case 3://write
-		case 4://writeln
 			if (symbol == leftpar)
 			{
 				//accept(leftpar);
@@ -963,7 +1028,7 @@ void procfuncpart(unsigned *followers)
 				{
 					nextsym();
 
-					typevar = expression(followers);	
+					typevar = expression(followers);
 					if (typevar == NULL)
 						nextsym();
 					if(symbol!=comma)
@@ -975,7 +1040,36 @@ void procfuncpart(unsigned *followers)
 						}
 						if (!nocode)
 						{
-							fprintf(output,"push int_format\n");
+							fprintf(output,"push int_format_p\n");
+							fprintf(output,"call printf\n");
+							fprintf(output,"add esp, 8\n");
+						}
+				} while (symbol == comma);
+			//	accept(rightpar);
+			}
+	//		accept(semicolon);
+			break;
+		case 4://writeln
+			if (symbol == leftpar)
+			{
+				//accept(leftpar);
+				do
+				{
+					nextsym();
+
+					typevar = expression(followers);
+					if (typevar == NULL)
+						nextsym();
+					if(symbol!=comma)
+						if(symbol!=rightpar)
+						{
+							Error(6);
+							skipto1(af_factparam);
+							nocode=1;
+						}
+						if (!nocode)
+						{
+							fprintf(output,"push int_format_p_n\n");
 							fprintf(output,"call printf\n");
 							fprintf(output,"add esp, 8\n");
 						}
@@ -1016,17 +1110,13 @@ void procfuncpart(unsigned *followers)
 						 
 						 Ident = SearchIdent(localscope, addrname, hashresult);
 						 if (Ident==NULL) {Error(104);nocode=1;}
-						 else
-						{
 						 typevar = (Ident->idtype);
 						 if (!Compatible(h_ptr, typevar))
 						 {
 							 Error(189);
 							 nocode=1;
 						 }
-						}
 						 accept(ident);
-
 						// gen_param_var(ptrparam);
 						 break;
 					 case 2:
@@ -1066,7 +1156,8 @@ void procfuncpart(unsigned *followers)
  //Оператор.
  void operatore (unsigned *followers)
  {
-	 int localLabelCounter = labelCounter++;
+	 int localLabelCounter = ++labelCounter;
+	 int llC;
 	 TYPEREC* exptyp;	//Тип выражения
 	 NODE* cond = NULL /*Идентификатор-условие*/, *caseid = NULL /**/; 
 	 struct textposition currentpos, exprpos; //Позиция в тексте (чтобы вывести ошибку в нужном месте)
@@ -1099,7 +1190,10 @@ void procfuncpart(unsigned *followers)
 		 accept (ifsy);
 
 		 exprpos = token; //Запоминаем позицию в тексте
+		 llC=localLabelCounter;
+		 localLabelCounter = ++labelCounter;
 		 exptyp = expression (ptra); //Анализируем выраженеи
+		 localLabelCounter = ++labelCounter;
 		 currentpos = token; //Записываем позицию после выражения
 		 if ((exptyp == NULL) || (!Compatible(exptyp, booltype))) //Если тип не совместим с булевым
 		 {
@@ -1114,38 +1208,101 @@ void procfuncpart(unsigned *followers)
 			Error(6);
 			skipto1(ptra);
 			nocode=1;
-		 }	 
+		 }
+		 
+		 
 		 SetDisjunct (af_iffalse, followers, ptra);
 		 accept (thensy);
+		 //++labelCounter;
+		 //int localLabelCounter = labelCounter + 1;
 		 if (!nocode) 
 		 {
-
 			fprintf(output,"pop eax\n");
 			fprintf(output,"cmp eax, 1\n");
             localLabelCounter++;
-            fprintf(output,"jne L%d\n", localLabelCounter);
+            fprintf(output,"jne L%d\n", llC);
+		//	llC=localLabelCounter;
 		 }
+		// localLabelCounter = ++labelCounter;
 		 operatore (ptra);
+		 localLabelCounter = ++labelCounter;
 		 if (symbol == elsesy)
 		 {
 			 if (!nocode) 
 			 {
-				 fprintf(output,"jmp L%d\n", (localLabelCounter + 1));
-				 fprintf(output,"L%d:\n", localLabelCounter);
-				 localLabelCounter++;
+				 fprintf(output,"jmp L%d\n", (llC + 1));
+				 fprintf(output,"L%d:\n", llC);
+				 llC++;
+				 
 			 }
 			 accept (elsesy);
 			 operatore (followers);
+			 localLabelCounter = ++labelCounter;
 		 }
-		 fprintf(output,"L%d:\n", localLabelCounter);
+		 fprintf(output,"L%d:\n", llC);
 		 labelCounter=localLabelCounter;
 	 }
+	 //Оператор цикла с параметром
+	 //else if (symbol == forsy)
+	 //{
+		// accept (forsy);
+		// //Нахождение идентификатора-индекса
+		// cond = SearchIdent(localscope, addrname, hashresult); 
+		// if (cond==NULL) Error(104);
+		// //Проверка класса использования
+		// if ((cond != NULL) && (cond->clas != VARS))
+		//	 Error(100);
+		// accept (ident);
+		// accept (assign);
+		// SetDisjunct(followers, af_for1, ptra);
+		// exprpos = token; //Позицию запоминаем
+		// exptyp = expression (ptra); //Анализируем тип выражения
+		// currentpos = token; //Запоминаем позиицю после выражения
+		// if ((cond != NULL) && (!Compatible(cond->idtype, exptyp))) //Проверяем его корректность и совместимость
+		// {
+		//	 token = exprpos;
+		//	 Error(145);
+		//	 token = currentpos;
+		// }
 
+		// if (!belong (symbol, ptra))
+		// {
+		//	Error(tosy);
+		//	skipto1(ptra);
+		// }
+
+		// if (symbol == tosy) accept (tosy);
+		// else accept (downtosy);
+		// SetDisjunct(af_whilefor, followers, ptra);
+		// exprpos = token; //Снова то же самое по запоминанию позиции в тексте, чтобы вывести ошибку
+		// exptyp = expression (ptra); //Анализ выражения
+		// currentpos = token;
+		// if ((cond != NULL) && (!Compatible(cond->idtype, exptyp))) //Проверка совместимости типа
+		// {
+		//	 token = exprpos;
+		//	 Error(145);
+		//	 token = currentpos;
+		// }
+		// if (!belong (symbol, ptra))
+		// {
+		//	Error(dosy);
+		//	skipto1(ptra);
+		// }
+		// accept (dosy);
+		// operatore (followers);
+	 //}
 	 else if (symbol==whilesy)
 	 {
+        //++labelCounter;
+        //int localLabelCounter=labelCounter+1;
 		nextsym ();
 		SetDisjunct(af_whilefor, followers, ptra);
+
+		llC=localLabelCounter;
+		fprintf(output,"L%d:\n",(llC + 1));
+		localLabelCounter=++labelCounter;
 		exptyp = expression(ptra);
+		localLabelCounter=++labelCounter;
 		if (exptyp != booltype) {Error (135);nocode=1;}
 		accept(dosy);
 		if (!nocode)
@@ -1153,39 +1310,48 @@ void procfuncpart(unsigned *followers)
             fprintf(output,"pop eax\n");
             fprintf(output,"cmp eax, 1\n");
             localLabelCounter++;
-            fprintf(output,"jne L%d\n",  localLabelCounter);
-            fprintf(output,"L%d:\n",(localLabelCounter + 1));
+            fprintf(output,"jne L%d\n",  llC);
+            
 		}
 		operatore(followers);
+		localLabelCounter=++labelCounter;
 		if (!nocode)
 		{
-            fprintf(output,"pop eax\n");
-            fprintf(output,"cmp eax, 1\n");
-            fprintf(output,"je L%d\n", (localLabelCounter + 1));
-            fprintf(output,"L%d:\n", localLabelCounter);
+            //fprintf(output,"pop eax\n");
+            //fprintf(output,"cmp eax, 1\n");
+            fprintf(output,"jmp L%d\n", (llC + 1));
+            fprintf(output,"L%d:\n", llC);
             labelCounter = localLabelCounter;
 		}
 	 }
 	 else if (symbol==repeatsy)
 	 {
+        //++labelCounter;
+        //int localLabelCounter=labelCounter+1;
+		nextsym ();
 		SetDisjunct(af_repeat, followers, ptra);
 		if (!nocode)
 		{
-            fprintf(output,"L%d:\n",(localLabelCounter));
+			llC=localLabelCounter;
+            fprintf(output,"L%d:\n",(llC));
 		}
+		localLabelCounter=++labelCounter;
 		operatore(ptra);
+		localLabelCounter=++labelCounter;
 		while (symbol == semicolon)	
 		{
 			nextsym();
 			operatore(ptra);
 		}
 		accept(untilsy);
+
 		exptyp = expression(followers);
+		localLabelCounter=++labelCounter;
 		if (!nocode)
 		{
             fprintf(output,"pop eax\n");
             fprintf(output,"cmp eax, 1\n");
-            fprintf(output,"je L%d\n", (localLabelCounter));
+            fprintf(output,"jne L%d\n", (llC));
             labelCounter = localLabelCounter;
 		}
 		if (exptyp != booltype) {Error (135);nocode=1;}
@@ -1217,7 +1383,12 @@ void procfuncpart(unsigned *followers)
 				 if (!nocode)
 				 {
 					 fprintf(output,"pop eax\n");
-					 fprintf(output,"mov %s, eax\n",Ident->idname);
+					if ( Ident->clas == VARS)
+						if (localscope->level==1)
+							fprintf(output,"mov [ebp - %d], eax\n",Ident->casenode.vars.offset);
+						else
+							fprintf(output,"mov [ebp + %d], eax\n",-Ident->casenode.vars.offset+localscope->count_locals-localscope->localvar);
+					 //fprintf(output,"push dword, [ebp - %d]\n", Ident->casenode.vars.offset);
 				 }
 			 }
 			 else 
@@ -1232,6 +1403,8 @@ void procfuncpart(unsigned *followers)
 				 }
 					 //Error(100);
 		 }		 
+		 //else
+			// Error(100);//StandartProc(followers);//read(ln) or write(ln)
 	 }
 	if (!belong (symbol, followers))
 	{
@@ -1248,7 +1421,7 @@ void procfuncpart(unsigned *followers)
 TYPEREC* logical(TYPEREC* exptype)
 {
 	if (exptype == NULL) return NULL;
-	if ((exptype == booltype))
+	if ((exptype == booltype))// || (exptype->typecode = LIMITEDS) && (exptype->casetype.limtype.basetype == booltype)) 
 		return booltype;
 	Error(145);
 	nocode=1;
@@ -1259,8 +1432,9 @@ TYPEREC* logical(TYPEREC* exptype)
 TYPEREC* test_mult(TYPEREC* exptype1, TYPEREC* exptype2)
 {
 	if ((exptype1 == NULL) || (exptype2 == NULL)) return NULL;
+//	if ((exptype1 == realtype) || (exptype2 == realtype)) return realtype;
 	if ((exptype1->typecode == SCALARS) && (exptype2->typecode == SCALARS) && (exptype1 != booltype)
-		&& (exptype2 != booltype))
+		&& (exptype2 != booltype))// && (exptype1 != chartype) && (exptype2 != chartype)) 
 			return exptype1;
 	Error(145);
 	nocode=1;
@@ -1271,6 +1445,7 @@ TYPEREC* test_mult(TYPEREC* exptype1, TYPEREC* exptype2)
 TYPEREC* test_add(TYPEREC* exptype1, TYPEREC* exptype2)
 {
 	if ((exptype1 == NULL) || (exptype2 == NULL)) return 0;
+//	if ((exptype1 == realtype) || (exptype2 == realtype)) return realtype;
 	if ((exptype1->typecode == SCALARS) && (exptype2->typecode == SCALARS) && (exptype1 != booltype)
 		&& (exptype2 != booltype)) 
 			return exptype1;
@@ -1297,7 +1472,7 @@ TYPEREC* test_comparing(TYPEREC* exptype1, TYPEREC* exptype2, unsigned operation
 //Проверка правильности знака перед выражением
 int right_sign(TYPEREC* exptype)
 {
-	if (exptype == NULL) return -1;
+	if (exptype == NULL) return 0;
 	return ((exptype == inttype));
 }
 
@@ -1307,7 +1482,7 @@ int right_sign(TYPEREC* exptype)
 
 	 TYPEREC* ex1type = NULL, *ex2type; //Типы операндов
 	 unsigned operation; //Код операции
-	 int localLabelCounter=labelCounter++;
+	 int localLabelCounter=++labelCounter;
 	 if (!belong (symbol, st_express))
 	 {
 		 Error(6);
@@ -1343,6 +1518,7 @@ int right_sign(TYPEREC* exptype)
 			break;
 		case greaterequal:
 			fprintf(output,"jae L%d\n",localLabelCounter);
+			break;
 		case later:
 			fprintf(output,"jb L%d\n",localLabelCounter);
 			break;
@@ -1415,14 +1591,24 @@ int right_sign(TYPEREC* exptype)
 				exptype = node->idtype;//variable(followers); ??????
 				nextsym();
 				if (!nocode)
-					fprintf(output,"push dword %s\n", node->idname);
+					if (localscope->level==1)
+						fprintf(output,"push dword [ebp - %d]\n", node->casenode.vars.offset);
+					else
+						fprintf(output,"push dword [ebp + %d]\n", -node->casenode.vars.offset+localscope->count_locals-localscope->localvar);
+					//fprintf(output,"push dword %s\n", node->idname);
 				break;
 			case CONSTS:
 				exptype = node->idtype;
 				nextsym();
 				if (!nocode)
 				{
-					fprintf(output,"push dword %d\n", node->casenode.constvalue.boolval);
+					//switch (node->idname)
+					{
+					//case "true":
+						fprintf(output,"push dword %d\n", node->casenode.constvalue.boolval);
+						//break;
+
+					}
 					fprintf(output,"push eax\n");
 				}				
 				break;
@@ -1436,6 +1622,7 @@ int right_sign(TYPEREC* exptype)
 					fprintf(output,"call %s\n", node->idname);
 					fprintf(output,"push eax\n");
 				}
+				
 				break;
 			default:
 				exptype = NULL;
@@ -1471,10 +1658,12 @@ int right_sign(TYPEREC* exptype)
                    TYPEREC *exptype   /* указатель на дескриптор типа
                                                     результата операции */)
 { 
+
     switch ( operation )
     { 
 		case andsy: 
 			fprintf(output,"and ebx, eax");
+            break;
         case star: 
 			fprintf(output,"imul ebx\n");
 				break;
@@ -1504,11 +1693,7 @@ TYPEREC* composed (unsigned *followers)
 		 nocode=1;
 	 }
 	 ex1type = factor (followers); //Проверка типа множителя
-         if ( !nocode )
-		 {
-            fprintf(output,"pop ebx\n");
-            fprintf(output,"pop eax\n");
-		 }
+
 	 while (belong(symbol, op_mult)) //Если символ - операции умножения/деления и т.п.
 	 { 
 		 operation = symbol; //Запоминаем операцию
@@ -1519,12 +1704,13 @@ TYPEREC* composed (unsigned *followers)
             fprintf(output,"pop ebx\n");
             fprintf(output,"pop eax\n");
 		 }
-		 ex1type = test_mult(ex1type, ex2type);//, operation); //Проверка корректности
+		 ex1type = test_mult(ex1type, ex2type); //Проверка корректности
          if ( !nocode )
 		 {
 			 multop ( operation, ex1type );
 			 fprintf(output,"push eax\n");
 		 }
+
 	
 	 }
 	 return ex1type;
@@ -1563,6 +1749,7 @@ TYPEREC* composed (unsigned *followers)
 			 fprintf(output,"mov eax, edx\n");
 			 fprintf(output,"push eax\n");
 		 }
+		
 	 }
 	 return ex1type;
  }
@@ -1580,7 +1767,7 @@ TYPEREC* composed (unsigned *followers)
 	SearchInTable("false"); 
 	//SearchInTable находит идентификатор в таблице,
 	//Заносит значение hash-функции в hashresult, адрес в таблице имен - в addrname.
-	//newident изменяет копию localscope->firstlocal
+	//newident изменяет копию localscope->firstlocal. А в переменную CreatedNode newident заносит указатель на созданную вершину
 	localscope->firstlocal = newident(localscope->firstlocal, hashresult, addrname, CONSTS);
 	//CreatedNode - переменная, обозачающая текущую вершину. Ту, которую мы создали
 	//Функцией newident
@@ -1599,7 +1786,6 @@ TYPEREC* composed (unsigned *followers)
 	chartype = newtype(SCALARS);
 	stringtype=newtype(STRINGS);
 	inttype = newtype(SCALARS);
-
 
 	//Создаем дескриптор типа integer
 	SearchInTable("integer");
@@ -1650,6 +1836,7 @@ TYPEREC* composed (unsigned *followers)
 	localscope->firstlocal = newident(localscope->firstlocal, hashresult, addrname, PROCS);
 	CreatedNode->idtype = NULL;
 	CreatedNode->casenode.proc.io = 4;
+	//CreatedNode->casenode.proc.param=funclistend;
 
 	//Фиктивная область создана. Теперь откроем область 
 	open_scope();
@@ -1666,8 +1853,11 @@ TYPEREC* composed (unsigned *followers)
 	accept (programsy);
 	accept (ident);
 	accept (semicolon);
+
 	block (blockfol);
 	
+	accept(point);
+
 	if (!nocode)
 	{
 		fprintf(output,"mov esp, ebp\n");
@@ -1675,7 +1865,7 @@ TYPEREC* composed (unsigned *followers)
 		fprintf(output,"ret\n");
 		fclose(output);
 	}
-	else remove("output.asm");
-	accept(point);
-	while (ch!=endoffile) ch=nextch();
- }﻿
+	else 
+		remove("output.asm");
+	while (ch!=endoffile) nextch();
+ }

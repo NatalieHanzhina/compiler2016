@@ -174,7 +174,7 @@ unsigned
 unsigned *illegalcodes;
 
 /*----------------------------- M A I N --------------------------------*/
-void main( argc, argv )
+int main( argc, argv )
 int argc;
 char *argv[];
 {
@@ -297,7 +297,7 @@ codes_VARFUNPR[]=       {VARS,FUNCS,PROCS,eolint};
 
 unsigned codes_illegal[]={REFERENCES,RECORDS,SETS,FILES,ARRAYS,eolint};
 
-fileswork( argc, argv );
+int f=fileswork( argc, argv );
 
 illegalcodes=convert_to_bits(codes_illegal);
 idstarters=convert_to_bits(codes_idstart);
@@ -371,7 +371,7 @@ set_VARFUNPR=convert_to_bits(codes_VARFUNPR);
    nextsym();
 
    programme();
-   dstfile=fopen(dfile,"a+");
+   //dstfile=fopen(dfile,"a+");
 	
    fprintf( dstfile, "\nКoмпиляция окончена: ошибок");
    if ( ErrorCount == 0 )
@@ -382,11 +382,12 @@ set_VARFUNPR=convert_to_bits(codes_VARFUNPR);
 #endif
    fclose( srcfile );
    fclose( dstfile );
+return 0;
 }
 
 
 /*****				FILESWORK				*****/
-fileswork( argc, argv )	/* осуществляет все начальные манипуляции с файлами */
+int fileswork( argc, argv )	/* осуществляет все начальные манипуляции с файлами */
 int argc;
 char *argv[];
 {  int index=0;			/* номер свежепрочитанной ошибки */
@@ -443,6 +444,7 @@ messages[index] = strcpy(messages[index],hotline);//strdup( strchr(hotline,':')+
    rewind( dstfile );
    fprintf( dstfile, "               Работает Pascal - компилятор \n" );
    fprintf( dstfile, "                   Листинг программы\n" );
+return 0;
 }
 
 /*-------------------- C O N V E R T _ T O _ B I T S -------------------*/
@@ -487,4 +489,4 @@ while(*str!=eolint)
 fprintf(t,"вышли из convert_to_bits\n");
 #endif
 return((unsigned*)set);
-}﻿
+}

@@ -105,7 +105,9 @@ printf("вошли в nextsym()\n");
 		     symbol=colon;
 		   break;
 	     case '.':
+
 		   ch=nextch( );
+
 		   if (ch=='.')
 		   {
 		     symbol=twopoints;
@@ -114,6 +116,7 @@ printf("вошли в nextsym()\n");
 		    else
 		     {
 		     symbol=point;
+			
 		     }
 		    break;
 	      case '^':
@@ -274,12 +277,12 @@ printf("вошли в nextsym()\n");
 		      ch=nextch( );
 		      break;
 		case endoffile:
-			printf("eof");
 		      symbol=endoffile;
 		      break;
 		default:
 		     /* Символ неопознанный          */
 #ifdef RDB
+
 		      switch(ch)
 			{case ' ':
 				fprintf(d,"пробел\n");
@@ -293,7 +296,7 @@ printf("вошли в nextsym()\n");
 			default:
 				fprintf(d,"неизвестный символ\n");
 			}
-#endif
+#endif 
 		      Error(E_BSYM);
 		      ch=nextch();
 		      goto start;
@@ -310,7 +313,7 @@ printf("вошли в nextsym()\n");
 	       }	/* else */
 	      }		/* if(ch!=endoffile) */
 	else
-	    {
+	    { 
 #ifdef RDB
 	    puts("NEXTSYM2 - пойман конец файла");
 #endif
@@ -775,4 +778,4 @@ printf("	вышли из number()\n");
 #endif
 }	/* number() */
 
-/*===================== T H E   E N D   O F   F I L E ==================*/﻿
+/*===================== T H E   E N D   O F   F I L E ==================*/
