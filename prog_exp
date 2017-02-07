@@ -1,0 +1,8 @@
+program example1;
+var a:integer;
+
+begin
+  a:=1;
+  a:=a*7/3+1;
+  write(a);
+end.
