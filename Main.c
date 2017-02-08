@@ -135,10 +135,6 @@ unsigned
 	/* торе while и выражения-второй границы изменения параметра    */
 	/* цикла в операторе for					*/
 *af_repeat,             /* ...после анализа оператора в теле цикла repeat*/
-*af_with,               /* ...после анализа  переменной  в   заголовке  */
-	/* оператора with						*/
-*af_case1,              /* ...после анализа выбирающего выражения в case*/
-*af_case2,              /* ...после анализа варианта в операторе case   */
 *af_forassign,	        /* ...после анализа переменной в операторе for	*/
 *af_for1, 		/* ...после анализа выражения-первой границы из-*/
 	/* менения параметра цикла в операторе for			*/
@@ -249,17 +245,13 @@ acodes_iffalse[]=       { elsesy,eolint},
 		/*символ, ожидаемый сразу после оператора ветви "истина"*/
 		/* в операторе if					*/
 acodes_wiwifor[]=       {comma,dosy,eolint},
-		/* символы, ожидаемые сразу после переменной в заголовке*/
-		/* оператора with;  { dosy,eolint} - символ, ожидаемый  */
+		/* { dosy,eolint} - символ, ожидаемый  */
 		/* сразу после условного выражения в операторе while и  */
 		/* сразу после выражения-второй границы изменения пара- */
 		/* метра цикла в операторе for				*/
 acodes_repeat[]=         { untilsy, semicolon, eolint },
 		/* cимволs, ожидаемые сразу после оператора в теле      */
-		/* оператора repeat					*/
-acodes_case1[]=          { ofsy,eolint },
-		/* символ, ожидаемый сразу после выбирающего выражения  */
-		/* в операторе case					*/
+		/* оператора repeat					*/			*/
 acodes_for1[]=           { tosy,downtosy,eolint},
 		/* символы, ожидаемые сразу после выражения-первой гра- */
 		/* ницы изменения пераметра цикла в операторе for       */
@@ -336,8 +328,6 @@ af_iftrue=convert_to_bits(acodes_iftrue);
 af_iffalse=convert_to_bits(acodes_iffalse);
 af_whilefor=convert_to_bits(acodes_wiwifor+1);
 af_repeat=convert_to_bits(acodes_repeat);
-af_case1=convert_to_bits(acodes_case1);
-af_case2=convert_to_bits(acodes_compcase);
 af_for1=convert_to_bits(acodes_for1);
 af_forassign=convert_to_bits(acodes_assign);
 
