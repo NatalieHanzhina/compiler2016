@@ -44,7 +44,6 @@ printf("вошли в nextsym()\n");
 	/* то любую букву или любую цифру обрабатываем однообразно	*/
 	if  (ch>= '0' &&  ch<='9') ch='0';
 	if ((ch>= 'a' &&  ch<='z')||(ch>='A' && ch <= 'Z'))  ch='a';
-	if((ch>='А' && ch<='Я') || (ch>='а' && ch<='я')) ch='а';
 	lname=0; 	/* номер элемента массива - имени, ключевого 	*/
 	/* слова или строковой константы				*/
 	switch(ch)
@@ -197,36 +196,6 @@ printf("вошли в nextsym()\n");
 			if(lname==MAX_IDENT)
 				while ((ch>='a' &&  ch<='z')||
 					(ch>='A' &&  ch<='Z')||
-					(ch>='0'  &&  ch<='9')||
-					ch == '_')
-						ch=nextch();
-			}
-		     if(symbol==ident)
-			SearchInTable(name);
-		     break;
-	       case 'а':
-		     ch=firstch;
-		     while ((ch=='_' || (ch>='А' && ch<='Я')
-			|| (ch>='а' && ch<='я')
-			|| (ch>='0' && ch<='9'))&& lname<MAX_IDENT)
-				{
-				/* замена заглавных букв строчными: 	*/
-				if(ch<'а' && ch!='_')
-					if(ch<'Я')
-						ch+=RUSDIF1;
-					else
-						ch+=RUSDIF2;
-				addsym( );
-				ch=nextch( );
-				}
-		     if(lname<10)
-			testkey1();
-		     else
-                        {
-			symbol=ident;
-			if(lname==MAX_IDENT)
-				while ((ch>='А' &&  ch<='п')||
-					(ch>='р' &&  ch<='я')||
 					(ch>='0'  &&  ch<='9')||
 					ch == '_')
 						ch=nextch();
@@ -470,96 +439,6 @@ printf("	вышли из testkey()\n");
 #endif
 	    }
 
-
-/*-------------------------- T E S T K E Y 1 ---------------------------*/
-void 		 testkey1	()  	/* обработка ключевых слов и	*/
-			/* идентификаторов, записанных на кириллице,	*/
-			/* формирование кода лексемы			*/
-				/* аргумент - значение внешней перемен-	*/
-			/* name - имя ( идентификатор или ключевое сло-	*/
-			/* во ) 					*/
-				/* результат - значение внешней пере-	*/
-			/* менной symbol - код лексемы			*/
-	    {
-	      struct key
-		      {
-		       unsigned codekey;
-		       char namekey[10];
-		       };
-	      static struct key  keywords[49]=
-	      /*  таблица ключевых слов и их кодов  			*/
-		 {
-		   { andsy,"и"},
-		   { ident," "},
-		   { untilsy,"до"},
-		   { ofsy,   "из"},
-		   { gotosy, "на"},
-		   { notsy,  "не"},
-		   { tosy,   "по"},
-		   { thensy, "то"},
-		   { ident,  "  "},
-		   { divsy, "дел"},
-		   { forsy, "для"},
-		   { orsy,  "или"},
-		   { dosy,  "исп"},
-		   { modsy, "мод"},
-		   { withsy,"над"},
-		   { nilsy, "нич"},
-		   { typesy,"тип"},
-		   { ident, "   "},
-		   { ifsy,    "если"},
-		   { setsy,   "множ"},
-		   { whilesy, "пока"},
-		   { filesy,  "файл"},
-		   { packedsy,"упак"},
-		   { insy,    "элем"},
-		   { ident,  "    "},
-		   { casesy, "выбор"},
-		   { elsesy, "иначе"},
-		   { endsy,  "конец"},
-		   { constsy,"конст"},
-		   { labelsy,"метка"},
-		   { varsy,  "перем"},
-		   { ident,  "     "},
-		   { downtosy,"вниздо"},
-		   { importsy,"импорт"},
-		   { recordsy,"запись"},
-		   { beginsy, "начало"},
-		   { arraysy, "массив"},
-		   { modulesy,"модуль"},
-		   { repeatsy,"повтор"},
-		   { onlysy,  "только"},
-		   { ident,   "      "},
-		   { functionsy, "функция"},
-		   { exportsy,   "экспорт"},
-		   { ident,      "       "},
-		   { qualifiedsy,"квалифик"},
-		   { ident,      "        "},
-		   { programsy,  "программа"},
-		   { proceduresy,"процедура"},
-		   { ident,      "         "}
-		    };
-
-		    /* массив номеров строк с кодом ident:	 	*/
-	   unsigned short last[10]=
-		      {
-		      -1,1,8,17,24,31,40,43,45,48
-		      };
-
-	   unsigned short i;/*вспомогательная переменная для поиска со-	*/
-	   /* бранной лексемы в таблице ключевых слов 			*/
-#ifdef REE
-printf("вошли в testkey1()\n");
-#endif
-			  strcpy(keywords[last[lname]].namekey,name);
-			  i=last[lname-1]+1;
-			  while (strcmp(keywords[i].namekey,name)!=0 )
-			  i++;
-			  symbol=keywords[i].codekey;
-#ifdef REE
-printf("	вышли из testkey1()\n");
-#endif
-		}
 /*--------------------------- N U M B E R ------------------------------*/
 void             number		()   	/* обработка целой или вещест-	*/
 			/* венной константы, формирование ее значения	*/
