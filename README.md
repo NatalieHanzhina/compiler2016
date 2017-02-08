@@ -3,13 +3,32 @@
 Реализованы лексический, синтаксический, семантический  анализ, генерация кода.
 # Build 
 gcc Main.c -o main
-# Run
-./main program_to_compile listing  
-В случае отсутствия ошибок компиляции выходных файла будет два: листинг (.lst) и .asm
-# I/o Examples
-Примеры входных файлов в репозитории: prog - с ошибками, prog_r - без ошибок.
 
-Выходные: prog.lst, prog_r.lst соответственно, output.asm - ассемблерный код для prog_r
+main находится в репозитории.
+
+# Run
+./main nod.pas nod.lst
+В случае отсутствия ошибок компиляции выходных файла будет два: листинг (.lst) и .asm
+nasm -f elf -l output.lst output.asm
+gcc -m32 -o prog output.o
+./prog
+
+# I/O Examples
+Примеры входных файлов в репозитории: 
+prog - с ошибками, 
+prog_r - без ошибок.
+prog_s.pas - без ошибок,
+prog_exp - без ошибок, содержит выражение,
+nod.pas - без ошибок, алгоритм Евклида вычисления НОД двух чисел.
+
+Выходные: 
+prog.lst, 
+prog_r.lst,
+prog_s.lst
+соответственно первым трем программам, 
+output.asm - ассемблерный код для prog_s.pas,
+output_exp.asm - ассемблерный код для prog_exp,
+output_nod.asm - ассемблерный код для nod.pas
 # Lang
 Язык следующий:
 
