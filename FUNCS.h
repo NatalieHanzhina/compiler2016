@@ -9,7 +9,6 @@ void	  /* Функции лексического анализатора: */ 	/*
     nextsym(),                                          /* nextsym4.c */
     addsym(),                                           /* nextsym4.c */
     testkey(),                                          /* nextsym4.c */
-    testkey1(),                                         /* nextsym4.c */
     number();                                           /* nextsym4.c */
 
 void      /* Функции синтаксиса  */
