@@ -6,22 +6,18 @@
 typedef int BOOLEAN;
 
 void	  /* Функции лексического анализатора: */ 	/* файлы:     */
-    nextsym(),                                          /* nextsym.c */
-    issymbol(),                                         /* nextsym.c */
-    isstring(),                                         /* nextsym.c */
-    letter(),                                           /* nextsym.c */
-    letter1(),                                          /* nextsym.c */
-    addsym(),                                           /* nextsym.c */
-    testkey(),                                          /* nextsym.c */
-    testkey1(),                                         /* nextsym.c */
-    number();                                           /* nextsym.c */
+    nextsym(),                                          /* nextsym4.c */
+    addsym(),                                           /* nextsym4.c */
+    testkey(),                                          /* nextsym4.c */
+    testkey1(),                                         /* nextsym4.c */
+    number();                                           /* nextsym4.c */
 
 void      /* Функции синтаксиса  */
-    accept(),                                           /* rumltlfn.c */
-    programme(),                                        /* rumstcom.c */
-    SearchInTable(),                                    /* rumtabl3.c */
-    skipto1(),                                          /* rumltlfn.c */
-    skipto2();                                          /* rumltlfn.c */
+    accept(),                                           /* litfuncs.c */
+    programme(),                                        /* last.c */
+    SearchInTable(),                                    /* last.c */
+    skipto1(),                                          /* litfuncs.c */
+    skipto2();                                          /* litfuncs.c */
 
 
 
