@@ -10,12 +10,3 @@
 #define PROCS      124   /* ПРОЦЕДУРА */
 #define FUNCS      125   /* ФУНКЦИЯ   */
 
-
-//union const_val  /* значение константы */
-//	{int intval;    /* целого типа */
-	    // charval;   /* символьного типа */
-//	int boolval;
-	//char *enumval;	/* перечислимого типа ( адрес в таблице имен ) */
-	//double realval;	/* вещественного типа */
-//	};
-﻿
