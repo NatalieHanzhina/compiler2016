@@ -3,16 +3,16 @@ var a,i,b:integer;
 function f(a,b:integer):integer;
 var i,e:integer;
 begin
-e:=3;
-i:=0;
+e:=a;
+i:=1;
 repeat
-a:=a*3;
+e:=e*a;
 i:=i+1;
 writeln (i);
 until i>=3;
-f:=a;
-f:=4;
+f:=e;
 end;
+
 begin
 read(a);
 i:=0;

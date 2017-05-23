@@ -1,20 +1,20 @@
 
 /*
-			  Главная программа.
+			  Main module.
 */
 #include <string.h>
 #include <stdio.h>
 #include <malloc.h>
 #include <locale.h>
 //#include <conio.h>
-#include "DECW.h"        /* определение  разделителей             */
-#include "DECKEY.h"      /* определение кодов ключевых слов       */
-#include "TREE.h"        /* cпособы использования идентификаторов */
-#include "TYPES.h"       /* объявление кодов типов		  */
-#include "TYPET.h"       /* файл внешних переменных               */
-#include "FUNCS.h"       /* описание нецелых функций              */
-#include "IODEFS.h"      /* oписания для модуля ввода/вывода      */
-#include "RUMERCOD.h"    /* коды ошибок                           */
+#include "DECW.h"        /* delimiters definition             */
+#include "DECKEY.h"      /* definition of key words codes       */
+#include "TREE.h"        /* identifiers usage cases */
+#include "TYPES.h"       /* types codes declaration		  */
+#include "TYPET.h"       /* external variables               */
+#include "FUNCS.h"       /* functions types definition              */
+#include "IODEFS.h"      /* i/o block defs      */
+#include "RUMERCOD.h"    /* errors codes                           */
 #include "Nextch.c"
 #include "HASH.C"
 #include "ERROR.C"
@@ -28,144 +28,140 @@
 #define TOUT
 #define labelquality 2
 #define SLENGTH  100
-extern int lineindex;	/* из модyля NEXTCH			*/
+extern int lineindex;	/* from NEXTCH			*/
 
-FILE *mesfile,      /* тексты сообщений об ошибках 		 */
-     *srcfile,      /* файл с исходным текстом 			 */
-     *dstfile;      /* файл с листингом и с сообщениями об ошибках */
+FILE *mesfile,      /* error messages 		 */
+     *srcfile,      /* source file 			 */
+     *dstfile;      /* listing file */
 
-  FILE *t;            /* временный файл с отладочными сообщениями    */
+  FILE *t;            /* temp file    */
 
-char  line[ MAXLEN ],           /* текущая строка 			 */
-      *messages[ MAXMES ],  /* сообщения об ошибках   */
-      sfile[ FNAME ],      /* имена файлов */
-      dfile[ FNAME ],      /* без пути 	*/
-      fulls[ MAXLEN ] = "",	/* добавка */
-      fulld[ MAXLEN ] = "";	/* - путь  */
+char  line[ MAXLEN ],           /* current string 			 */
+      *messages[ MAXMES ],  /* error mes   */
+      sfile[ FNAME ],      /* file names */
+      dfile[ FNAME ],      /* without dir 	*/
+      fulls[ MAXLEN ] = "",	/* adding */
+      fulld[ MAXLEN ] = "";	/* - dir  */
 
-short LastInLine,              /*   значащие символы в строке 		 */
-      ErrInx,                  /*   число сделанных в строке ошибок      */
-      ErrorOverflow,           /*   1-слишком много ошибок, 0-нормально  */
-      ErrorCount;              /*   число сделанных в программе ошибок   */
+short LastInLine,              /*   significant characters in string 		 */
+      ErrInx,                  /*   amount of errors by string      */
+      ErrorOverflow,           /*   1-overmuch, 0-normal  */
+      ErrorCount;              /*   total errors per program   */
 
 struct textposition positionnow,
        token,
        next;
-unsigned symbol,         /* код лексемы,выдаваемый синт.анал.	 */
-	 nextsymbol,     /* код следуюshcheй лексемы(случай [3..5]	 */
+unsigned symbol,         /* code of token given by syntax analyzer	 */
+	 nextsymbol,     /* code of following token	 */
 	 errorcode;
 
-	/*    лексемы, полученные из  лексического анализатора */
+	/*    tokens from lexer */
 
-char               name[79];     /* идентификатор                  */
-int		   nmbi;         /* целое  число                   */
-double	      	   nmbf;         /* число  с  плавающей  точкой    */
-int   	           onesymbol;    /* символ                         */
-unsigned  short    cnt;          /* для  отладки                   */
+char               name[79];     /* identifier                */
+int		   nmbi;         /* integer                   */
+double	      	   nmbf;         /* float    */
+int   	           onesymbol;    /* character                         */
+unsigned  short    cnt;          /* for debug                   */
 unsigned  short    lname;
 unsigned           sw;
-int	     	   ch;           /* текущий символ                 */
+int	     	   ch;           /* current character                */
 char strings[MAXLEN];
 
-	       /* Переменные для генерации кода */
+	    
 
 unsigned long dstr[SLENGTH];
 
 
-/* Описание реализуемых в виде битовых строк множеств символов, 	*/
-/* стартовых для различных обрабатываемых конструкций:			*/
+/* Definition of sets presented as bit sets, 	*/
+/* which are the start chars for processed constructions			*/
 
 unsigned
 
-*idstarters,		/* множество из одного стартового символа ident */
-*begpart,		/* стартовые символы функции block()		*/
-*rpar,			/* правая скобка 				*/
-*st_typepart,		/* стартовые символы функции typepart()		*/
-*st_varpart,		/* стартовые символы функции varpart()		*/
-*st_procfuncpart,	/* стартовые символы функции procfuncpart()	*/
-*st_statpart,		/* стартовые символы функции statpart()		*/
-*st_constant,	 	/* стартовые символы функции constant()		*/
-*st_conaftersign,	/* стартовые символы конструкции константы, 	*/
-	/* идущей после знака + или -					*/
-*st_typ,		/* стартовые символы функции typ()		*/
-*st_simpletype,	/* стартовые символы функции simpletype()	*/
-*st_statement,          /* стартовые символы конструкции <оператор>     */
-*st_startstatement,     /* стартовые символы оператора при нейтрализации*/
-*st_express,		/* ... выражения 				*/
-*st_termfact;		/* ... слагаемого и множителя 			*/
+*idstarters,		/* single start char - ident */
+*begpart,		/* start char for block()		*/
+*rpar,			/* right parenthesis  				*/
+*st_typepart,		/* start chars for typepart()		*/
+*st_varpart,		/* start chars for varpart()		*/
+*st_procfuncpart,	/* start chars for procfuncpart()	*/
+*st_statpart,		/* start chars for statpart()		*/
+*st_constant,	 	/* start chars for constant()		*/
+*st_conaftersign,	/* start chars for const, 	*/
+	/* after plus/minus sign					*/
+*st_typ,		/* start chars for typ()		*/
+*st_simpletype,	/* start chars for simpletype()	*/
+*st_statement,          /* start chars for construction <operator>     */
+*st_startstatement,     /* start chars for operator*/
+*st_express,		/* start chars for expression 				*/
+*st_termfact;		/* start chars for term, factor 			*/
 
 
-/* Описание реализуемых в виде битовых строк множеств символов, 	*/
-/* ожидаемых сразу после обработки различных конструкций:		*/
-
-unsigned
-
-*blockfol,		/* ...после обработки блока основной программы  */
-*af_1constant,		/* ...после анализа константы при вызове функ-	*/
-	/* ции constant() из функции constdeclaration(), а также после  */
-	/* анализа конструкции объявления переменных при вызове функции */
-	/* vardeclaration() из функции varpart()			*/
-*af_3const1,		/* ...после анализа первой константы отрезка	*/
-	/* при обработке оного в функции simpletype()			*/
-*af_4const2,		/* ...после анализа второй константы отрезка	*/
-	/* при обработке оного в функции simpletype()			*/
-*af_1typ,		/* ...после анализа конструкции описания типа	*/
-	/* при вызове функции typ() из typedeclaration()		*/
-*af_2typ,		/* ...после анализа конструкции описания типа	*/
-	/* при вызове функции typ() из fixpart()			*/
-*af_proclistparam,      /* ...после анализа списка параметров процедуры */
-*af_funclistparam,      /* ...после анализа списка параметров функции   */
-*af_blockprocfunc,      /* ...после анализа блока процедуры или функции */
-*af_sameparam,          /* ...после анализа однотипных параметров       */
-*af_factparam,          /* ...после анализа фактических параметров      */
-	/* процедур и функций                                           */
-*af_oneparam,           /* ...после анализа параметра стандартных       */
-	/* процедур и функций, имеющих один параметр                    */
-*af_writeparam,         /* ...после анализа параметра стандартных       */
-	/* процедур write и writeln                                     */
-
-*af_assignment,         /* ...после анализа переменной в операторе      */
-	/* присваивания							*/
-*af_compstatement,      /* ...после анализа оператора в составном оп-ре */
-*af_iftrue,             /* ...после анализа условного выражения в опера-*/
-	/*торе if							*/
-*af_iffalse,            /* ...после анализа оператора ветви "истина" в  */
-	/* операторе if							*/
-*af_whilefor,		/* ...после анализа условного выражения в опера-*/
-	/* торе while и выражения-второй границы изменения параметра    */
-	/* цикла в операторе for					*/
-*af_repeat,             /* ...после анализа оператора в теле цикла repeat*/
-*af_forassign,	        /* ...после анализа переменной в операторе for	*/
-*af_for1, 		/* ...после анализа выражения-первой границы из-*/
-	/* менения параметра цикла в операторе for			*/
-*af_ident;		/* ...после идентификатора в "переменной"	*/
-
-/* Описание реализуемых в виде битовых строк множеств допустимых симво- */
-/* лов операций в разделе компиляции выражений 				*/
+/* Definition of sets presented as bit sets, 	*/
+/* which are follow processed constructions			*/
 
 unsigned
 
-*op_rel,		/* операции отношения над простыми выражениями	*/
-*op_add,		/* аддитивные операции над слагаемыми		*/
-*op_mult;		/* мультипликативные операции над множителями	*/
+*blockfol,		/* ...after processing of main program block  */
+*af_1constant,		/* ...after processing of const while calling	*/
+	/* constant() from constdeclaration(), also after  */
+	/* analysis of constrution of declaration variables while calling */
+	/* vardeclaration() from varpart()			*/
+*af_3const1,		/* ...after processing of first const	*/
+	/* into simpletype()			*/
+*af_4const2,		/* ...after processing of second const	*/
+	/* into simpletype()			*/
+*af_1typ,		/* ...after processing of type construction	*/
+	/* while calling typ() from typedeclaration()		*/
+*af_2typ,		/* ... after analyzing the construction of the type declaration */
+/* When calling the typ () function from fixpart () */
+*af_proclistparam,      /* ... after analyzing the list of procedure parameters */
+*af_funclistparam,      /* ... after analyzing the list of function parameters   */
+*af_blockprocfunc,      /* ... after analyzing the procedure or function block */
+*af_sameparam,          /* ... after analyzing the same parameters       */
+*af_factparam,          /* ... after analyzing the actual parameters      */
+	/* of procedure or function                                         */
+*af_oneparam,           /* ... after analyzing the standard parameter * /
+/* of Procedures and functions that have one parameter                   */
+*af_writeparam,         /* ...After analyzing the parameter of standard       */
+	/* procedures write and writeln                                     */
 
-/* Описание реализуемых в виде битовых строк множеств способов исполь-	*/
-/* зования идентификаторов:						*/
+*af_assignment,         /* ...After analyzing the variable in the assign statement      */
+*af_compstatement,      /* ...After the analysis of the operator in the composite operator */
+*af_iftrue,             /* ...After analyzing the conditional expression in the if statement*/
+
+*af_iffalse,            /* ...After analyzing the operator of the branch "true" in if statement */
+
+*af_whilefor,		/* ...After analyzing the conditional expression in*/
+	/*  while statement					*/
+*af_repeat,             /* ...After the analysis of the operator in  repeat loop body*/
+*af_forassign,	        /* ...After analyzing the variable in the for statement		*/
+*af_for1, 		/* ...After analyzing the expression-first boundary of the loop parameter in the for statement			*/
+*af_ident;		/* ...After the identifier in the "variable"	*/
+
+/* Definition of sets presented as bit sets, 	*/
+/* for expressions				*/
 
 unsigned
 
-*set_VARCONFUNCS,	/* доп. способы использования - VARS, CONSTS, FUNCS */
-*set_VARS,	/* допустимый способ использования - VARS		*/
-*set_TYPES, 	/* допустимый способ использования - TYPES 		*/
-*set_CONSTS,	/* допустимый способ использования - CONSTS 		*/
-*set_TYCON,     /* допустимые способы использования - TYPES,CONSTS	*/
-*set_FUNCS,     /* допустимый способ использования - FUNCS              */
-*set_PROCS,     /* допустимый способ использования - PROCS              */
-*set_FUNPR,     /* допустимые способы использования - FUNCS,PROCS       */
-*set_VARFUNPR;  /* допустимые способы использования - VARS,FUNCS,PROCS  */
+*op_rel,		/* Operations of relation over simple expressions	*/
+*op_add,		/* Additive operations on terms		*/
+*op_mult;		/* Multiplicative operations on factors	*/
 
-/* Описание реализуемого в виде битовой строки множества кодов типов,	*/
-/* недопустимых для использования в том или ином контексте:		*/
+/* Definition of sets presented as bit sets for cases of identifiers usage	*/
+
+unsigned
+
+*set_VARCONFUNCS,	/* Acceptable use of VARS, CONSTS, FUNCS */
+*set_VARS,	/* Acceptable use of  VARS		*/
+*set_TYPES, 	/*Acceptable use of  TYPES 		*/
+*set_CONSTS,	/* Acceptable use of  CONSTS 		*/
+*set_TYCON,     /* Acceptable use of  TYPES,CONSTS	*/
+*set_FUNCS,     /* Acceptable use of  FUNCS              */
+*set_PROCS,     /* Acceptable use of  PROCS              */
+*set_FUNPR,     /* Acceptable use of  FUNCS,PROCS       */
+*set_VARFUNPR;  /* Acceptable use of  VARS,FUNCS,PROCS  */
+
+/* Definition of sets presented as bit sets for types codes,	*/
+/* Unacceptable for use in a particular context:		*/
 
 unsigned *illegalcodes;
 
@@ -175,102 +171,83 @@ int argc;
 char *argv[];
 {
 setlocale(LC_ALL,"rus");
-/* Множества КОДОВ символов, стартовых для различных обрабатываемых 	*/
-/* конструкций:								*/
+/* Sets of CODES characters starting for different processed */
+/* Constructions: */
 
 unsigned
 
-codes_idstart[]=	{ident,eolint},	/* стартовые символы некоторых 	*/
-		/* обрабатываемых конструкций 				*/
+codes_idstart[]=	{ident,eolint},	/* Sets of CODES characters starting for different processed */
+/* Constructions: */
 codes_block[]=		{labelsy,constsy,typesy,varsy,functionsy,
-	proceduresy,beginsy,eolint},	/* стартовые символы разделов	*/
-		/* описаний и раздела операторов			*/
+	proceduresy,beginsy,eolint},	/* Start symbols for sections of descriptions and section of operators			*/
 codes_rightpar[]=	{rightpar,eolint},
-		/* правая скобка 					*/
+		/* right parenthesis 					*/
 codes_constant[]=	{plus,minus,charc,stringc,ident,intc,floatc,
-	eolint},	/* стартовые символы конструкции constant       */
+	eolint},	/* Starting symbols for the construction constant       */
 codes_typ[]=		{packedsy,arrow,arraysy,filesy,setsy,recordsy,
 	plus,minus,ident,leftpar,intc,charc,stringc,eolint},
-			/* стартовые символы конструкции описания типа;	*/
+			/* Start symbols for the type declaration;	*/
 		/* {plus,minus,ident,leftpar,intc,charc,stringc,eolint}-*/
-		/* стартовые символы конструкции описания простого типа */
+		/* Start symbols for the description of a simple type */
 
 codes_statement[]=      {intc,endsy,elsesy,untilsy,ident,beginsy,ifsy,
 	whilesy,repeatsy,forsy,casesy,withsy,semicolon,gotosy,eolint},
-		/* стартовые символы конструкции <оператор>             */
-		/* (при нейтрализации ошибок используются символы:      */
+		/* Starting symbols of the construct <operator>             */
+		/* (When neutralizing errors, symbols:      */
 		/* {beginsy,ifsy,whilesy,repeatsy,forsy,casesy,withsy,  */
 		/* semicolon,gotosy,eolint} )                           */
 codes_express[]=	{ plus, minus, leftpar, lbracket, notsy, ident,
 	intc, floatc, charc, stringc, nilsy, eolint },
-		/* стартовые символы выражения и простого выражения 	*/
+		/* Starting symbols of an expression and a simple expression 	*/
 codes_termfact[]=	{ ident, leftpar, lbracket, notsy, intc, floatc,
 	charc, stringc, nilsy, eolint };
-		/* стартовые символы слагаемого и множителя 		*/
+		/*Starting symbols for the term and multiplier 		*/
 
 
-/* Множества кодов символов, ожидаемых после обработки различных кон-	*/
-/* струкций:								*/
+/* The sets of character codes expected after processing of various constructions:								*/
 
 unsigned
 
-acodes_block[]=			{point,endoffile,eolint},	/* сим-	*/
-		/* волы, следующие за конструкцией блока в основной 	*/
-		/* программе			 			*/
-acodes_simpletype[]=		{comma,rbracket,eolint}, 	/* сим- */
-		/* волы, ожидаемые сразу после вызова simpletype() во 	*/
-		/* время анализа типа "массив" 				*/
-acodes_typ[]=		{endsy,rightpar,semicolon,eolint},	/* сим-	*/
-		/* волы, ожидаемые сразу после анализа конструкции typ 	*/
-		/* при вызове функции typ() из fixpart()		*/
-acodes_3const[]=	{twopoints,comma,rbracket,eolint},	/* коды */
-		/* символов, ожидаемых сразу после анализа константы 	*/
+acodes_block[]=			{point,endoffile,eolint},	/* Symbols following the block construction in the main program */
+acodes_simpletype[]=		{comma,rbracket,eolint}, 	/* �������, ��������� ����� ����� ������ simpletype() �� ����� ������� ���� "������" 				*/
+acodes_typ[]=		{endsy,rightpar,semicolon,eolint},	/* Characters expected immediately after analysis of the typ construct when calling the typ () function from fixpart ()		*/
+acodes_3const[]=	{twopoints,comma,rbracket,eolint},	/* Character codes expected immediately after the analysis of the constant 	*/
 acodes_listparam[]=     {colon,semicolon,forwardsy,constsy,varsy,eolint},
-		/* символы, ожидаемые сразу после списка параметров     */
-		/* ( символы functionsy,proceduresy,beginsy уже есть в  */
+		/* Characters expected immediately after the parameter list     */
+		/* ( functionsy,proceduresy,beginsy ��� ���� �  */
 		/*   followers)                                         */
 acodes_factparam[]=      {comma,rightpar,eolint},
-		/* символы, ожидаемые сразу после разбора фактических   */
-		/* параметров процедур и функций                        */
+		/* Characters expected immediately after parsing the actual parameters of procedures and functions                       */
 acodes_assign[]=         {assign,eolint},
-		/* символ, ожидаемый сразу после переменной в операторе */
-		/* присваивания и в операторе for                       */
+		/* The character expected immediately after the variable in the assignment statement and in the for statement                       */
 acodes_compcase[]=      {semicolon,endsy,eolint},
-		/* символы, ожидаемые сразу после оператора в составном */
-		/* операторе     */
+		/* Characters expected immediately after the statement in the compound statement     */
 acodes_iftrue[]=        { thensy,eolint},
-		/* символ, ожидаемый сразу после условного выражения в  */
-		/* операторе if						*/
+		/* The character expected immediately after the conditional expression in the if statement						*/
 acodes_iffalse[]=       { elsesy,eolint},
-		/*символ, ожидаемый сразу после оператора ветви "истина"*/
-		/* в операторе if					*/
+		/*Character expected immediately after the operator of the branch "true" in the if statement					*/
 acodes_wiwifor[]=       {comma,dosy,eolint},
-		/* { dosy,eolint} - символ, ожидаемый  */
-		/* сразу после условного выражения в операторе while и  */
-		/* сразу после выражения-второй границы изменения пара- */
-		/* метра цикла в операторе for				*/
+		/*   { dosy,eolint} - The character expected immediately after the conditional expression in the while statement and immediately after the expression-the second boundary of the loop parameter change in the for statement				*/
 acodes_repeat[]=         { untilsy, semicolon, eolint },
-		/* cимволs, ожидаемые сразу после оператора в теле      */
-		/* оператора repeat					*/			*/
+		/* Characters expected immediately after the operator in the body of the repeat statement					*/
 acodes_for1[]=           { tosy,downtosy,eolint},
-		/* символы, ожидаемые сразу после выражения-первой гра- */
-		/* ницы изменения пераметра цикла в операторе for       */
+		/* Characters expected immediately after the expression-the first boundary of the loop perimeter change in the for statement       */
 acodes_ident[]=		{ lbracket, arrow, point, eolint };
-		/* ... после идентификатора в переменной 		*/
+		/* ... After the identifier in the variable 		*/
 
-/* Множества кодов операций в разделе компиляции выражений: 		*/
+/* Sets of operation codes in the section for compiling expressions: 		*/
 
 unsigned
 
 codes_rel[]=		{ later, laterequal, greater, greaterequal,
 	equal, latergreater, insy, eolint },
-		/* операции отношения 					*/
+		/* Relational operations					*/
 codes_add[]=		{ plus, minus, orsy, eolint },
-		/* аддитивные операции 					*/
+		/* Additive operations				*/
 codes_mult[]=		{ star, slash, divsy, modsy, andsy, eolint };
-		/* мультипликативные операции				*/
+		/* ����������������� ��������				*/
 
-/* Множества кодов допустимых способов использования идентификаторов:	*/
+/* Sets of codes for the acceptable use of identifiers:	*/
 
 unsigned
 
@@ -284,8 +261,7 @@ codes_VARFUNPR[]=       {VARS,FUNCS,PROCS,eolint};
 
 
 
-/* Множества кодов типов, недопустимых для использования в том или ином */
-/* контексте:								*/
+/* Sets of type codes that are not valid for use in a particular context*/
 
 unsigned codes_illegal[]={REFERENCES,RECORDS,SETS,FILES,ARRAYS,eolint};
 
@@ -350,9 +326,9 @@ set_VARFUNPR=convert_to_bits(codes_VARFUNPR);
    nextsymbol=0;
    next.linenumber=0;
    next.charnumber=0;
-   positionnow.linenumber = 0;       /* установка позиции */
-   positionnow.charnumber = 1;       /* первого символа текста */
-   lineindex = 0;                    /* индекс литеры */
+   positionnow.linenumber = 0;       /* Position setting */
+   positionnow.charnumber = 1;       /* The first character of the text */
+   lineindex = 0;                    /* Index letters */
    ErrorCount = ErrInx = 0;
    ErrorOverflow = FALSE;
    ReadNextLine();
@@ -363,9 +339,9 @@ set_VARFUNPR=convert_to_bits(codes_VARFUNPR);
    programme();
    //dstfile=fopen(dfile,"a+");
 	
-   fprintf( dstfile, "\nКoмпиляция окончена: ошибок");
+   fprintf( dstfile, "\nThe compilation is over: number of errors is");
    if ( ErrorCount == 0 )
-      fprintf( dstfile, " нет !\n");
+      fprintf( dstfile, " null !\n");
       else fprintf( dstfile, " - %3d !\n",ErrorCount );
 #ifdef TOUT
    fclose(t);
@@ -377,35 +353,35 @@ return 0;
 
 
 /*****				FILESWORK				*****/
-int fileswork( argc, argv )	/* осуществляет все начальные манипуляции с файлами */
+int fileswork( argc, argv )	/*Performs all initial manipulation of files */
 int argc;
 char *argv[];
-{  int index=0;			/* номер свежепрочитанной ошибки */
-   char hotline[80]; 		/* свежепрочитанная строка */
+{  int index=0;			/* Number of current error */
+   char hotline[80]; 		/* current string */
 
-      /* ----- загрузка сообщений об ошибках ----- */
+      /* ----- load error messages ----- */
    if((mesfile=fopen("Err.msg", "r"))==NULL)
-      { puts("Ошибка открытия ERR.MSG\n"); exit(3); }
+      { puts("Error opening ERR.MSG\n"); exit(3); }
    rewind( mesfile );
    if( fgets(hotline,MAXLEN,mesfile)==NULL || fgets(hotline,MAXLEN,mesfile)==NULL)
-      puts("Ошибка чтения заголовка файла сообщений");
+      puts("Error reading header of message file");
    while( !feof(mesfile) ) {
-      fgets( hotline, MAXLEN, mesfile );	/* чтение строки в формате сообщения */
-      index=atoi(strncpy(hotline,hotline,MAXLEN));	/* получение индекса         */
+      fgets( hotline, MAXLEN, mesfile );	/* Reading a string in a message format */
+      index=atoi(strncpy(hotline,hotline,MAXLEN));	/* Getting an index        */
       messages[index]=(char*)malloc( sizeof(char) * MAXMES );
 messages[index] = strcpy(messages[index],hotline);//strdup( strchr(hotline,':')+2 );
 	//printf("%d %s\n",index,messages[index]);
  //     if( strlen(strchr( hotline, *(strchr(hotline,':')+2))) > 0) 
 //	  {	 if((messages[index] = strdup( strchr(hotline,':')+2 ))==NULL) 
-//		{printf("Индекс=%d, недостаточно памяти\n",index);
+//		{printf("Index =%d, not enough memory\n",index);
 //	     exit(0);	 
 //		}
   ///    }
     //  else messages[index] = NULL;
    }
    fclose( mesfile );
-      /* ----- Сообщения об ошибках загружены или зафиксирована ошибка ----- */
-      /* ----- Открытие вайлов ----- */
+      /* ----- Error messages loaded or error is detected----- */
+      /* ----- File opening ----- */
    if( argc==3 ) {
       srcfile=fopen( argv[1], "r" );
       dstfile=fopen( argv[2], "w" );
@@ -416,11 +392,11 @@ messages[index] = strcpy(messages[index],hotline);//strdup( strchr(hotline,':')+
    printf( " Enter file name of listing : " );
    scanf( "%s", dfile );
    if(( srcfile = fopen( strcat(fulls,sfile), "r")) == NULL ) {
-      printf( "Невозможно открыть файл TESTS\\%s с исходным текстом !\n", sfile );
+      printf( "Unable to open TESTS file \\%s with source text !\n", sfile );
 	  exit(1);
    }
    if(( dstfile = fopen( strcat(fulld,dfile), "w")) == NULL ) {
-      printf( "Невозможно открыть файл TESTS\\%s с листингом программы !\n", dfile );
+      printf( "Can not open TESTS file \\%s with program listing !\n", dfile );
 
       exit(2);
    }
@@ -428,55 +404,45 @@ messages[index] = strcpy(messages[index],hotline);//strdup( strchr(hotline,':')+
 #ifdef TOUT
    t=fopen( "TESTS\\t.out", "w" );
    rewind( t );
-   fprintf( t, "                      Файл отладочных печатей T.OUT\n\n");
+   fprintf( t, "                      File of debug T.OUT\n\n");
 #endif
    rewind( srcfile );
    rewind( dstfile );
-   fprintf( dstfile, "               Работает Pascal - компилятор \n" );
-   fprintf( dstfile, "                   Листинг программы\n" );
+   fprintf( dstfile, "               Pascal - compiler \n" );
+   fprintf( dstfile, "                   Listing of the program\n" );
 return 0;
 }
 
 /*-------------------- C O N V E R T _ T O _ B I T S -------------------*/
 unsigned 	*convert_to_bits	(unsigned *intstr)
-				/* переводит одномерный массив с базо-	*/
-			/* вым типом 0..127 в 128-битовую строку, со-	*/
-			/* стояние каждого бита в которой отражает от-	*/
-			/* сутствие или наличие в исходном массиве эле-	*/
-			/* мента, численно равного номеру этого бита	*/
-				/* используется для представления в	*/
-			/* виде битовых строк стартовых символов раз-	*/
-			/* личных языковых конструкций паскаля, симво-	*/
-			/* лов, ожидаемых сразу после обработки тех или */
-			/* иных конструкций, а также множеств допусти-	*/
-			/* мых способов использования идентификатора и 	*/
-			/* прочих неблаговидных вещей			*/
-				/* аргумент - адрес массива, под-	*/
-			/* лежащего конвертированию			*/
-				/* возвращает адрес другого массива, -	*/
-			/* массива целых чисел с суммарной длиной эле-	*/
-			/* ментов в 128 бит, который и именуем 128-би-	*/
-			/* товой строкой				*/
+				/* Translates a one-dimensional array with base type 0..127 
+				into a 128-bit string, the state of each bit in which reflects 
+				the absence or presence in the source array of an element numerically 
+				equal to the number of this bit used to represent in the form of bit 
+				strings of start symbols of various Pascal language constructs, symbols ,
+				Expected immediately after the processing of certain constructions, as 
+				well as the set of acceptable ways of using the identifier and other 
+				unseen things, the argument - the address of the array to be converted 
+				returns The address of an array of integers with a total length of 
+				elements of 128 bits, which we call a 128-bit string*/
 {
 unsigned     *set,
-	*str,		/* вспомогательный указатель на исходный массив */
-	wordnum,	/* номер слова - составляющего битовой строки	*/
-	bitnum;		/* номер бита в слове, содержащемся в строке	*/
+	*str,		/* Auxiliary pointer to the original array */
+	wordnum,	/* Word number - of the constituent bit string	*/
+	bitnum;		/* Bit number in the word contained in the string	*/
 str=intstr;
 #ifdef DEBPRINT
-fprintf(t," Вошли в convert_to_bits\n");
+fprintf(t," In convert_to_bits\n");
 #endif
 set=(unsigned*)calloc(8,sizeof(unsigned));
 while(*str!=eolint)	
-	{wordnum= *str / WORDLENGTH;	/* вычисление номера слова, в 	*/
-		/* котором находится бит с номером *str			*/
-	bitnum= *str % WORDLENGTH;	/* вычисление номера бита в	*/
-		/* слове, в котором он находится			*/
+	{wordnum= *str / WORDLENGTH;	/* Calculating the word number in which the bit with the number is located *str			*/
+	bitnum= *str % WORDLENGTH;	/* Calculating the bit number in the word in which it is located			*/
 	set[wordnum] |= (1<<(WORDLENGTH-1-bitnum));
 	str++;
 	}
 #ifdef DEBPRINT
-fprintf(t,"вышли из convert_to_bits\n");
+fprintf(t,"Out of convert_to_bits\n");
 #endif
 return((unsigned*)set);
 }

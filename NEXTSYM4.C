@@ -1,51 +1,46 @@
 
-		/* ФАЙЛ "NEXTSYM.C" - ЛЕКСИЧЕСКИЙ АНАЛИЗАТОР */
-      #include <stdio.h>	 /* Файл определений стандартного в/в   */
-      #include <string.h>	 /* Файл станд. ф-ий работы со строками */
+		/* FILE "NEXTSYM.C" - LEXER */
+      #include <stdio.h>	
+      #include <string.h>	
 
-      #define MAX_IDENT 78	 /* Максимальная длина идентификатора	*/
+      #define MAX_IDENT 78	 /* max ident length	*/
 
       #define PLUS	1
       #define MINUS    -1
 
-      extern FILE *d;	 	 /* для отладочных печатей		*/
-      extern FILE *t;		 /* для отладочных печатей		*/
+      extern FILE *d;	 	 /* for debug printing		*/
+      extern FILE *t;		 /* for debug printing		*/
 
 /*-------------------------- N E X T S Y M -----------------------------*/
-void		 nextsym	() 	/* обработка следующего сим-	*/
-			/* вола ( лексемы ) в тексте программы пользо-	*/
-			/* вателя					*/
-				/* аргумент функции - значение внешней	*/
-			/* переменной ch - текущая литера текста про-	*/
-			/* граммы пользователя				*/
-				/* результат - код собранной или опо-	*/
-			/* знанной анализатором лексемы - значение 	*/
-			/* внешней переменной symbol			*/
+void		 nextsym	() 	/* Processing of the next character (token) 
+							in the text of the user program the function 
+							argument - the value of the external variable ch 
+							- the current text of the user program text, the 
+							result - the code of the token collected or recognized
+							by the parser - the value of the external variable symbol
+							*/
 	{
-      char firstch;	 /* вспомогательная переменная для хранения     */
-	/* первой литеры числа,идентификатора ии ключевого слова        */
+      char firstch;	 /* Auxiliary variable for storing the first letter of the number, the identifier and the keyword       */
 #ifdef REE
-printf("вошли в nextsym()\n");
+printf("����� � nextsym()\n");
 #endif
 	start:
       if (ch!=endoffile)
 	{
-		/* если не  конец файла, то продолжение разбора лексем 	*/
+		/* If not the end of the file, then continue parsing the tokens 	*/
 	if ( nextsymbol==0)
-	{	/* если не  особый случай, когда разбирается лексема	*/
-	/* twopoints ,то разбор  происходит обычным образом 		*/
-		/* пропустим  пробелы, концы строки и знаки табуляции: 	*/
+	{	/* If not a special case, when the lexeme twopoints is parsed, then parsing occurs in the usual way		*/
+		/* Skip spaces, end lines and tabs: 	*/
 	while  ((ch == ' ') || (ch=='\t')||(ch=='\n')) ch=nextch();
-		/* запомним начальные позиции  разбора лексемы:     	*/
+		/* Remember the initial positions of the token analysis:     	*/
        token.linenumber = positionnow.linenumber;
        token.charnumber = positionnow.charnumber;
-		/* определим,буква  или  цифра? 			*/
-	firstch=ch;	/* запоминаем литеру: если это буква или цифра,	*/
-	/* то любую букву или любую цифру обрабатываем однообразно	*/
+		/* Define a letter or number? 			*/
+	firstch=ch;	/* Remember the letter: if it's a letter or a number, */
+/* Then we process any letter or any digit the same way	*/
 	if  (ch>= '0' &&  ch<='9') ch='0';
 	if ((ch>= 'a' &&  ch<='z')||(ch>='A' && ch <= 'Z'))  ch='a';
-	lname=0; 	/* номер элемента массива - имени, ключевого 	*/
-	/* слова или строковой константы				*/
+	lname=0; 	/* Number of the element of the array - name, keyword or string constant				*/
 	switch(ch)
 	   {
 	   case '*':
@@ -97,7 +92,7 @@ printf("вошли в nextsym()\n");
 		  ch=nextch( );
 		  if (ch=='=')
 		  {
-		     symbol=assign;     /* Символ  присваивания */
+		     symbol=assign;     
 		     ch=nextch( );
 		   }
 		   else
@@ -125,7 +120,7 @@ printf("вошли в nextsym()\n");
 	      case '(':
 		    ch=nextch( );
 		    if (ch=='*')
-		    { /* пропускаем комментарий */
+		    { /* Skip comment */
 		       do
 			  {do ch=nextch( );
 			  while (ch !='*' && ch !=endoffile);
@@ -140,7 +135,7 @@ printf("вошли в nextsym()\n");
 			  {symbol=endoffile;
 			  Error(E_NRCOMM);
 			  }
-		     } /* закончили пропуск комментария */
+		     } /*Finished skipping a comment */
 		     else
 		       symbol=leftpar;
 		     break;
@@ -157,7 +152,7 @@ printf("вошли в nextsym()\n");
 		     ch=nextch( );
 		     break;
 	       case '{':
-			/* пропускаем комментарий */
+			/* Skip comment */
 		     do ch=nextch();
 		     while(ch!='}' && ch !=endoffile);
 		     if(ch=='}')
@@ -170,7 +165,7 @@ printf("вошли в nextsym()\n");
 			symbol=endoffile;
 			}
 		     break;
-			/* закончили пропуск комментария */
+			/* Finished skipping a comment */
 	       case '0':
 		     ch=firstch;
 		     number( );
@@ -182,7 +177,7 @@ printf("вошли в nextsym()\n");
 			(ch>='0'  &&  ch<='9')||
 			ch == '_') && lname<MAX_IDENT)
 				{
-				/* замена заглавных букв строчными: 	*/
+				/* Capitalization of lowercase letters: 	*/
 				if(ch<'a'&& ch!='_' && ch>'9')
 					ch+=LATDIF;
 				addsym( );
@@ -249,21 +244,21 @@ printf("вошли в nextsym()\n");
 		      symbol=endoffile;
 		      break;
 		default:
-		     /* Символ неопознанный          */
+		     /*Unidentified symbol          */
 #ifdef RDB
 
 		      switch(ch)
 			{case ' ':
-				fprintf(d,"пробел\n");
+				fprintf(d,"space\n");
 				break;
 			case '\n':
-				fprintf(d,"новая строка\n");
+				fprintf(d,"new string\n");
 				break;
 			case '\0':
-				fprintf(d,"конец строки\n");
+				fprintf(d,"the end of string\n");
 				break;
 			default:
-				fprintf(d,"неизвестный символ\n");
+				fprintf(d,"unidentified symbol\n");
 			}
 #endif 
 		      Error(E_BSYM);
@@ -273,7 +268,7 @@ printf("вошли в nextsym()\n");
 		}	/* if(nextsymbol==0) */
 	       else
 	       {
-	       /* случай , когда происходит  разбор  символа  twopoints */
+	       /* The case where the character twopoints is parsed   */
 
 	       token.linenumber=next.linenumber;
 	       token.charnumber=next.charnumber;
@@ -284,62 +279,59 @@ printf("вошли в nextsym()\n");
 	else
 	    { 
 #ifdef RDB
-	    puts("NEXTSYM2 - пойман конец файла");
+	    puts("NEXTSYM2 - The end of the file");
 #endif
 	 symbol=endoffile;
 	    }
 #ifdef RDB
 	if(symbol==ident)
-		{fprintf(d,"Идентификатор. ");
+		{fprintf(d,"Identifier. ");
 		fprintf(d,"%s\n",name);
 		puts(name);}
 	else if(symbol==charc)
-		{fprintf(d,"Символьная константа. ");
+		{fprintf(d,"char. ");
 		fprintf(d,"%c\n",onesymbol);}
 	else if(symbol==stringc)
-		{fprintf(d,"Строковая константа. ");
+		{fprintf(d,"String. ");
 		fprintf(d,"%s\n",strings);}
 	else if(symbol==intc)
-		fprintf(d,"Константа типа integer=%d.\n",nmbi);
+		fprintf(d,"integer const=%d.\n",nmbi);
 	else if(symbol==floatc)
-		fprintf(d,"Константа типа real=%f.\n",nmbf);
-	else fprintf(d,"либо разделитель,либо ключевое слово.\n");
+		fprintf(d,"real const=%f.\n",nmbf);
+	else fprintf(d,"Either a delimiter or a keyword.\n");
 #endif
 #ifdef RT
-fprintf(t,"код символа %d\n",symbol);
+fprintf(t,"symbol code %d\n",symbol);
 #endif
 #ifdef REE
-printf("	вышли из nextsym()\n");
+printf("	nextsym() is off\n");
 #endif
 }	/* nextsym() */
 
 /*------------------------------- A D D S Y M --------------------------*/
-void		 addsym		()      /* накапливает символы в масси-	*/
-			/* ве name - для сборки идентификатора или клю-	*/
-			/* чевого слова					*/
-				/* результаты - значения внешних пере-	*/
-			/* менных lname - длина собранной символьной 	*/
-			/* строки - и name - сама строка		*/
+void		 addsym		()      /* Accumulates symbols in the array name - 
+								the results for the assembly of the identifier or the keyword 
+								 are the values of the external variables lname - 
+								 the length of the collected character string -
+								 and name - the string itself		*/
 		    {
 #ifdef REE
-printf("вошли в addsym()\n");
+printf("Entered into addsym()\n");
 #endif
 		    name[lname]=ch;
 		    name[++lname]='\0';
 #ifdef REE
-printf("	вышли из addsym()\n");
+printf("	Leave addsym()\n");
 #endif
 		    }
 
 /*------------------------------ T E S T K E Y -------------------------*/
-void 		 testkey	()  	/* обработка латинских ключевых */
-			/* слов и идентификаторов, формирование кода 	*/
-			/* лексемы					*/
-				/* аргумент - значение внешней перемен-	*/
-			/* name - имя ( идентификатор или ключевое сло-	*/
-			/* во ) 					*/
-				/* результат - значение внешней пере-	*/
-			/* менной symbol - код лексемы			*/
+void 		 testkey	()  	/* Processing of Latin keywords and identifiers, 
+								the formation of the code of the lexeme argument
+								- the value of the external variable - name 
+								(identifier or keyword) result - the value of the 
+								external variable symbol - the code of the token		
+								*/
 		    {
 		    struct key
 			      {
@@ -347,7 +339,7 @@ void 		 testkey	()  	/* обработка латинских ключевых *
 			      char     namekey[15];
 			      };
 		    static struct key  keywords[64]=
-		    /* таблица ключевых слов и их кодов 		*/
+		    /* Table of keywords and their codes 		*/
 		      {
 			  { ident," "},
 			  { dosy, "do"},
@@ -419,67 +411,62 @@ void 		 testkey	()  	/* обработка латинских ключевых *
 			  { ident,        "              "}
 			   };
 
-			   /* массив номеров строк с кодом ident: 	*/
+			   /* Array of line numbers with code ident: 	*/
 	unsigned short last[15]=
 			   {
 			   -1,0,7,17,28,35,45,50,53,57,58,59,60,61,63
 			   };
 
-	unsigned short i;  /* вспомогат.переменная для поиска собранной */
-	/* лексемы в таблице ключевых слов 				*/
+	unsigned short i;  /* Auxiliary variable to search for collected */
+/* Tokens in the keyword table 				*/
 #ifdef REE
-printf("вошли в testkey()\n");
+printf("Enter testkey()\n");
 #endif
 			strcpy(keywords[last[lname]].namekey,name);
 			i = last[lname-1]+1;
 			while (strcmp(keywords[i].namekey,name)!=0) i++;
 			symbol=keywords[i].codekey;
 #ifdef REE
-printf("	вышли из testkey()\n");
+printf("	Leave testkey()\n");
 #endif
 	    }
 
+
 /*--------------------------- N U M B E R ------------------------------*/
-void             number		()   	/* обработка целой или вещест-	*/
-			/* венной константы, формирование ее значения	*/
-				/* аргумент - значение внешней перемен-	*/
-			/* ной name - последовательность символов, за-	*/
-			/* дающих константу в программе пользователя	*/
-				/* результат - значение одной из внеш-	*/
-			/* них переменных: nmbi - если константа целая,	*/
-			/* или nmbf - если константа вещественная	*/
+void             number		()   	/* Processing of an integer or real constant,
+									the formation of its value argument - the value
+									of an external variable name - the sequence of
+									characters that give a constant in the user program 
+									result - the value of one of the external variables:
+									nmbi - if the constant is integer, or nmbf - if the 
+									constant is real	*/
 
 {
-char 	lit1,lit2;	/* вспомогат.переменные для обработки конструк-	*/
-	/* ции, в которой встретилась точка     			*/
-int 	ord_correct=0,  /* для констант с положительным порядком - по-	*/
-	/* рядок, на который вещественное число, заданное пользователем,*/
-	/* отличается от нормализованного ( в сторону уменьшения ман-	*/
-	/* тиссы );							*/
-	/* для констант с отрицательным порядком - то же число +1, но	*/
-	/* только в сторону увеличения мантиссы				*/
-	digit,		/* целочисленное представление литеры         	*/
-	order=0,	/* порядок вещественного числа                	*/
-	differ=0,	/* вспомогательная переменная для обработки     */
-	/* дробной части вещественного числа          			*/
-	intflag=FALSE,	/* принимает значение FALSE, если целая часть 	*/
-	/* не превышает максимально допустимого значения целой констан-	*/
-	/* ты, TRUE - в противном случае;				*/
-	ordflag=PLUS;	/* принимает значение MINUS, если порядок в ве-	*/
-	/* щественной константе отрицательный,PLUS - в противном случае	*/
+char 	lit1,lit2;	/* Auxiliary variables for processing the structure in which the point occurred     			*/
+int 	ord_correct=0,  /* For constants with positive order - the order on which 
+						the real number, given by the user, differs from the 
+						normalized (towards the decrease of the mantissa); For 
+						constants with negative order - the same number +1, but 
+						only in the direction of increasing the mantissa				
+						*/
+	digit,		/* Integer representation        	*/
+	order=0,	/* The order of the real number                	*/
+	differ=0,	/* Auxiliary variable for processing     */
+	/* Fractional part of the real number          			*/
+	intflag=FALSE,	/* Takes the value FALSE if the integer part */
+/* Does not exceed the maximum permissible value of an integer constant, TRUE - otherwise;				*/
+	ordflag=PLUS;	/* Takes the value MINUS if the order in the real constant is negative, PLUS otherwise	*/
 #ifdef REE
-printf("вошли в number()\n");
+printf("Enter number()\n");
 #endif
 nmbi=nmbf=0;
-while( ch >= '0' && ch <= '9')	/* обрабатывается целая часть константы	*/
+while( ch >= '0' && ch <= '9')	/* The whole part of the constant is processed	*/
 	{
 	digit=ch-'0';
 	if (nmbi<maxint/10 || (nmbi==maxint/10 && digit<=maxint%10))
 		{
-		nmbi=10*nmbi+digit;	/* формируем значение целой  	*/
-	/* константы							*/
-		nmbf=10*nmbf+digit;	/* формируем значение вещест-	*/
-	/* венной константы 						*/
+		nmbi=10*nmbi+digit;	/* Form the value of an integer constant							*/
+		nmbf=10*nmbf+digit;	/* We form the value of the real constant				*/
 #ifdef RDB
 	printf("nmbf==%g\n",nmbf);
 #endif
@@ -487,66 +474,63 @@ while( ch >= '0' && ch <= '9')	/* обрабатывается целая час
 		}
 	else
 		{
-		intflag=TRUE;	/* запомнили, что формируемая целая 	*/
-	/* константа превышает предел					*/
-		nmbf=10*nmbf+digit;	/* продолжаем формировать зна-	*/
-	/* чение вещественной константы					*/
+		intflag=TRUE;	/* Remember that the whole formed */
+/* constant exceeds the limit					*/
+		nmbf=10*nmbf+digit;	/* Continue to form the value of the real constant					*/
 #ifdef RDB
 		printf("nmbf==%g\n", nmbf);
 #endif
 		ch=nextch();
 		}
-	if (nmbf!=0) ord_correct--; 	/* считаем количество значащих 	*/
-	/* цифр целой части						*/
+	if (nmbf!=0) ord_correct--; 	/* Consider the number of significant digits of the integer part						*/
 
 	}	/* while... */
 if (ch== '.' || ch=='E' || ch == 'e')
 	{
 	if (ch=='.')
 		{
-		/* возможен случай ".." 				*/
+		/* Case of ".." is possible  				*/
 		next.linenumber=positionnow.linenumber;
 		next.charnumber=positionnow.charnumber;
-		lit1=ch; 	/* запоминаем первую точку 		*/
+		lit1=ch; 	/* Remember the first point 		*/
 		ch=nextch();
 		if (ch=='.')
 			{
 			nextsymbol=twopoints;
-			ch=nextch();	/* имеем случай 3..5 , т.е.	*/
-	/* выдадим код целого числа синтаксическому анализатору, а во  	*/
-	/* вспомогательной переменной nextsymbol запомним код следующей */
-	/* лексемы, которую уже разобрали, - twopoints			*/
-			goto intnumber;	/* переход к анализу целой кон-	*/
-	/* станты 							*/
+			ch=nextch();	/* We have the case 3..5, i.e. Issue 
+							the integer code to the parser, and in
+							the auxiliary variable nextsymbol, 
+							remember the code of the next token 
+							that was already parsed, - twopoints		
+							*/
+			goto intnumber;	/* Transition to the analysis of an integer constant					*/
 			}
 		else
 			{
-			lit2=ch;	/* запоминаем последнюю литеру 	*/
-			ch=lit1; 	/* восстанавливаем предыдущую 	*/
-	/* литеру 							*/
+			lit2=ch;	/* Remember the last letter 	*/
+			ch=lit1; 	/* Restore the previous letter							*/
 			}
 		}  	/* if(ch=='.') */
-	/* Итак, константа вещественная:				*/
+	/* So, the constant is real:				*/
 	symbol = floatc;
 	switch(ch)
 		{
 		case '.':
 			order=0;
 			ch=lit2;
-			/* чтение дробной части     			*/
+			/* ������ ������� �����     			*/
 			while (ch>='0' && ch<='9')
 				{
 				digit=ch-'0';
-				nmbf=10*nmbf+digit;	/* продолжаем 	*/
-	/* формировать значение вещественной константы    		*/
+				nmbf=10*nmbf+digit;	/* Continue to form the value of the real constant   		*/
 #ifdef RDB
 	printf("nmbf==%g, order==%d ",nmbf,order);
 #endif
-				differ--;	/* считаем, на сколько 	*/
-	/* необходимо уменьшить порядок числа, чтобы получить результат,*/
-	/*  равный заданному пользователем числу 			*/
-				if (nmbf==0) ord_correct++;	/* счи-	*/
-	/* таем количество нулей после точки 				*/
+				differ--;	/* Consider how much it is necessary to 
+							reduce the order of the number in order 
+							to obtain a result equal to the user-specified number 	
+							*/
+				if (nmbf==0) ord_correct++;	/* ������� ���������� ����� ����� ����� 				*/
 #ifdef RDB
 	printf("ord_correct==%d, differ==%d\n",ord_correct,differ);
 #endif
@@ -557,35 +541,35 @@ if (ch== '.' || ch=='E' || ch == 'e')
 			break;
 		case 'e':
 		case 'E':
-		ordscan:	/*  чтение порядка:  			*/
+		ordscan:	/*  Reading order:  			*/
 			ch=nextch( );
 			if (ch == '-')
 				{
 				ordflag=MINUS;
-				ord_correct++;  /* максимально допусти-	*/
-	/* мая степень отличается по абсолютному значению на единицу от	*/
-	/* минимально допустимой					*/
+				ord_correct++;  /* The maximum permissible degree 
+								differs in absolute value by one from 
+								the minimum permissible					*/
 				ch=nextch();
 				}
 			else
 				if( ch == '+')
 					ch=nextch();
 			if(ch < '0' || ch > '9')
-				Error(E_BCONST);	/* если в обра-	*/
-	/* батываемой константе встретилась литера, отличная от цифры,	*/
-	/* то выдаем соответствующее сообщение об ошибке		*/
-			order=0;    /* формируем абсолютное значение 	*/
-	/* порядка, например, для константы 56.39е-4  order=4		*/
+				Error(E_BCONST);	/* If a non-digit character is encountered in the 
+									processed constant, then we issue the appropriate
+									error message, order = 0; */
+									/* Form the absolute value of the order, for example,
+									for the constant 56.39e-4 order = 4		*/
 			while (ch>='0' && ch<='9')
 				{
 				digit=ch-'0';
 				order=order*10+digit;
 #ifdef RDB
-	printf("\nПроверка: order=%d, MAXORDER=%d, ord_correct=%d\n\n",
+	printf("\nCheck: order=%d, MAXORDER=%d, ord_correct=%d\n\n",
 		order,MAXORDER,ord_correct);
 #endif
 				if(order>MAXORDER+ord_correct*ordflag)
-	/* слишком большая или слишком маленькая вещественная константа */
+	/* Too large or too small real constant */
 					{
 					if(ordflag+1)
 						Error(E_BREALC);
@@ -593,10 +577,10 @@ if (ch== '.' || ch=='E' || ch == 'e')
 						Error(E_LREALC);
 					nmbf=0;
 					while (ch>='0' && ch<='9')
-	/* пропускаем литеры до конца константы:			*/
+	/* Skip letters to the end of the constant:			*/
 						ch=nextch();
 #ifdef REE
-printf("	вышли из number()\n");
+printf("	LEave number()\n");
 #endif
 					return;	/* Good-bye, my love,	*/
 	/* good-bye!							*/
@@ -605,16 +589,15 @@ printf("	вышли из number()\n");
 				};  	/* while... */
 			break;
 		}; 	/* switch */
-	order+=differ*ordflag;	/* компенсация за слишком большое зна-	*/
-	/* чение фикcированной части сформированной нами константы пу-	*/
-	/* тем соответствующего уменьшения порядка          		*/
+	order+=differ*ordflag;	/* Compensation for the too large value of
+							the fixed part of the constant formed by the 
+							corresponding reduction of the order         		
+							*/
 #ifdef RDB
-	printf("=== Cформирован order == %d\n",order);
+	printf("=== C���������� order == %d\n",order);
 #endif
-	/* Далее - окончательное формирование значения константы в nmbf,*/
-	/* умножение на 10 в степени order:				*/
-	if(order<0)	/* Здесь идут переприсваивания в чисто техни-	*/
-	/* ческих целях:						*/
+	/* Next - the final formation of the value of the constant in nmbf, multiplying by 10 in the order:			*/
+	if(order<0)	/* There are re-appropriations for purely technical purposes:						*/
 		{order=-order;
 		ordflag=-ordflag;
 		}
@@ -638,22 +621,21 @@ printf("	вышли из number()\n");
 	printf("**** nmbf==%g, order==%d\n",nmbf,order);
 #endif
 #ifdef REE
-printf("	вышли из number()\n");
+printf("	Leave number()\n");
 #endif
-	return;	/* покидаем number(); значение вещественной константы 	*/
-	/* сформировано во внешней переменной nmbf			*/
+	return;	/*Leave number (); The value of the real constant is formed in the external variable nmbf			*/
 	}	/* if (ch=='.' || ch=='E' || ch=='e') */
 intnumber:
-if (intflag==TRUE)	/* целая константа превышает предел		*/
+if (intflag==TRUE)	/* The whole constant exceeds the limit		*/
 	{
-	Error(E_BINTC);	/* ошибочка вышла!				*/
+	Error(E_BINTC);	/* Error!				*/
 	nmbi=0;
 	}
 
-	/* Возвращаем код целого  числа: 				*/
+	/* Return the integer code: 				*/
 symbol=intc;
 #ifdef REE
-printf("	вышли из number()\n");
+printf("	Leave number()\n");
 #endif
 }	/* number() */
 

@@ -1,5 +1,5 @@
 
-		   /* ФАЙЛ "HASH.C" - ХЭШ-ФУНКЦИЯ */
+		   /* FILE "HASH.C" - HASH-FUNCTION */
 hash(name)
 char *name;
 {
@@ -8,4 +8,4 @@ char *name;
    while( name[i]!=0 ) result+=name[i++]|i;
    return(abs( result%997 ));
 }
-﻿
+

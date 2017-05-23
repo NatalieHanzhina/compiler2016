@@ -1,18 +1,18 @@
 #include <stdlib.h>
 #include <stdio.h>
-/*Описание переменных простых типов. Анализ выражения. Операторы: условный, выбора, составной, цикла с параметром*/
+/* */
 
-#define TYPES      121   /* ТИП */
-#define CONSTS     122   /* КОНСТАНТА */
-#define VARS       123   /* ПЕРЕМЕННАЯ */
-#define PROCS      124   /* ПРОЦЕДУРА */
-#define FUNCS      125   /* ФУНКЦИЯ   */
+#define TYPES      121   
+#define CONSTS     122   
+#define VARS       123   
+#define PROCS      124   
+#define FUNCS      125  
 typedef struct typerec TYPEREC;
 int labelCounter=0;
-#define REFERENCE 1 /*локальная переменная или параметр-значение*/
-#define REGISTER  2 /* регистр */
-#define CONSTANT  3 /* непосредственное данное */
-#define REF_VAR   4 /* переменная, переданная по ссылке */
+#define REFERENCE 1 /*Local variable or parameter-value*/
+#define REGISTER  2 /* register */
+#define CONSTANT  3 /* CONSTANT*/
+#define REF_VAR   4 /* Referenced variable */
 
 unsigned nocode;
 FILE *output;
@@ -22,47 +22,43 @@ FILE *output;
 extern void Error(unsigned);
 
 void block(unsigned *followers);
-union const_val /* значение константы */
+union const_val /* Constant value*/
 {
-	int intval      /* целого  или символьного типа */ ;
+	int intval      /* Integer or boolean type */ ;
 	int boolval;
-//	float realval   /* вещественного типа */ ;
-//	char *charval   /* перечислимого типа ( адрес в таблице имен ) */;
+//	char *charval   /* char */;
 };
 
 struct idparam
- { unsigned parhash; /* Значение Hash - функции */
-   char *patidn; /* Ссылка на имя в таблице имен */
-   TYPEREC *Type; /* Информация о типе параметра */
-   int mettransf; /* Способ передачи */
-   //struct prfun_as_par *par; /* Ссылка на информацию о параметрах параметра - процедуры */
-   unsigned par_offset;/* смещение параметра относительно начала области данных */   
-   struct idparam *linkparam; /* Ссылка на информацию о следующем параметре */
+ { unsigned parhash; /*The value of the Hash function*/
+   char *patidn; /* A reference to the name in the table of names */
+   TYPEREC *Type; /* Information about the type of the parameter */
+   int mettransf; /* The transmission method */
+   unsigned par_offset;/* Parameter offset relative to the beginning of the data area */   
+   struct idparam *linkparam; /* Link to information about the next parameter */
  };
 
 struct treenode
 {
-	unsigned hashvalue   /* значение hash - функции */;
-	char *idname        /* адрес имени в таблице имён */ ;
-	unsigned clas      /* способ использования */;
-    TYPEREC  *idtype; /* указатель на дескриптор типа */
+	unsigned hashvalue   /* The value of the Hash function */;
+	char *idname        /* The name in the name table */ ;
+	unsigned clas      /* the way of using */;
+    TYPEREC  *idtype; /* Pointer to type descriptor */
 	union
-	{  /* для констант */
-		union const_val constvalue; /* значение константы */
-        /* для процедур ( функций )  */
+	{  /* For constants*/
+		union const_val constvalue; /* Constant value */
+        /* For procedures (functions) */
         struct
         {
-			struct idparam *param /* указатель  на информацию о параметрах */;
-			int forw /* информация об опережающем описании */;
+			struct idparam *param /* Pointer to information about the parameters */;
+			int forw /* Forward description information */;
 			int io; /*1-read, 2-readln, 3-write, 4-writeln*/
-            //int count_locals /* размер области данных процедуры (функции) */;
-           // int begin_code /* указатель на начало кода */;
         } proc;
 		struct
 		{ 
 			unsigned staticlevel;
 			int offset;
-			unsigned param_var /* =TRUE,  если переменная является параметром, переданным по ссылке */;
+			unsigned param_var /* =TRUE,  If the variable is a parameter passed by reference */;
 		} vars;
 	} casenode;
 
@@ -70,42 +66,42 @@ struct treenode
 	struct treenode *rightlink;
 }*CreatedNode = NULL, *LocalTree = NULL;
 typedef struct treenode NODE;
-//Структура дескриптора типа:
-union variapart   /*вариантная часть дескриптора*/
+//Type descriptor structure:
+union variapart   /*Variant part of the descriptor*/
 { 
-		TYPEREC  *basetype; /* указатель на базовый тип */
-        struct reestrconsts  *firstconst;  /* указатель на первый элемент списка констант */
+		TYPEREC  *basetype; /* Pointer to base type */
+        struct reestrconsts  *firstconst;  /* Pointer to the first element of the constants list */
 
 };  
 
-struct reestrconsts  /* структура элемента списка констант перечислительного типа*/
+struct reestrconsts  /* Structure of an enumeration type constant*/
 {
-	char *addrconsts; /* адрес индентификатора в таблице имен */
-	struct reestrconsts *next; /* указатель  на следующую структуру*/
+	char *addrconsts; /* Address of the identifier in the table of names */
+	struct reestrconsts *next; /* Pointer to the following structure*/
 };
 
 
 
 struct typerec
 {
-	struct typerec *next;  /* указатель на следующий дескриптор типа */
-	unsigned typecode;  /* код типа */
-	union variapart casetype;  /* вариантная часть дескриптора */
+	struct typerec *next;  /* A pointer to the next type descriptor */
+	unsigned typecode;  /* Type code */
+	union variapart casetype;  /* Variant part of the descriptor */
 } *booltype, *inttype, *chartype, *stringtype, *vartype, *ConstantType = NULL;
 
-//Это структура-описатель области действия localscope
+//This is a localscope scope descriptor structure 
 struct scope
 {
 	struct treenode *firstlocal;
 	TYPEREC *typechain;
 	struct scope *enclosingscope;
-	int count_locals /* размер области данных */;
+	int count_locals /* Size of the data scope */;
 	int level;
 	int localvar;
 } *localscope;
 typedef struct scope SCOPE;
 int level=0;
-//Открытие новой области действия
+//Open a new scope
 void open_scope()
 {
 	SCOPE *newscope;
@@ -118,7 +114,7 @@ void open_scope()
 	newscope->localvar=0;
 	localscope = newscope;	
 };
-void dispose_types( TYPEREC* Item ) { /* Удаление Таблицы Типов */
+void dispose_types( TYPEREC* Item ) { /* Deleting a Type Table */
   TYPEREC* PrevItem;
   while(Item!=NULL)
    { PrevItem=Item; 
@@ -126,26 +122,26 @@ void dispose_types( TYPEREC* Item ) { /* Удаление Таблицы Тип�
      free( (char*) PrevItem);
    };
 };
-void dispose_ids(struct treenode* Root) { /* Удаление Таблицы Идентификаторов */
+void dispose_ids(struct treenode* Root) { /* Deleting the Identifiers Table */
    if(Root!=NULL)
    { dispose_ids(Root->leftlink); 
      dispose_ids(Root->rightlink); 
      free((char*) Root); 
    };
 }
-//Закрытие области действия
+//Closing the scope
 void close_scope()
 {
 	//localscope = localscope->enclosingscope;
 	SCOPE *oldscope; 
 	oldscope=localscope;
-	localscope=localscope->enclosingscope;  /* Удаление Таблицы Идентификаторов */
-	dispose_ids( oldscope->firstlocal);  /* Удаление Таблицы Типов */
+	localscope=localscope->enclosingscope;  /* Deleting the Identifiers Table */
+	dispose_ids( oldscope->firstlocal);  /* Deleting a Type Table */
 	dispose_types( oldscope->typechain);  
 	free( (char *) oldscope);
 }
 
-//Внесение нового дескриптора типа в таблицу типов
+//Entering a new type descriptor into a type table
 TYPEREC *newtype(int tcode)
 {
 	struct typerec *new1;
@@ -164,18 +160,18 @@ TYPEREC *newtype(int tcode)
 	return(new1);
 }
 
-//Внесение нового идентификатора в таблицу идентификаторов
-//В переменную CreatedNode вносится ссылка на созданный элемент
+//Adding a new identifier to the Identifiers  table
+//The CreatedNode variable is referenced to the created item
 NODE *newident(NODE *Tree,unsigned hashfunc,char *addrname,int classused)
 {
 	NODE *tree;
 	int flag = 0;
 	tree = Tree;
-	//Проводим поиск текущего идентификатора в данной области действия.
-	//За его присутствие отвечает переменная flag
+	//We search for the current identifier in this scope.
+	//its presence corresponds to the variable flag
 	while ((tree != NULL) && (flag != 1))
 	{
-		//Если нашли - flag стави на 1
+		
 		if ((tree->idname == addrname) && (tree->clas == classused))
 		{
 			if ((tree->clas==FUNCS || tree->clas==PROCS) && tree->casenode.proc.forw)
@@ -186,7 +182,7 @@ NODE *newident(NODE *Tree,unsigned hashfunc,char *addrname,int classused)
 			else
 				flag = 1;
 		}
-		//Если нет - ищем дальше по дереву. В зависимости от хеш-функции.
+		//If you did not find it - look for a tree. Depending on the hash function.
 		else
 			if (tree->hashvalue  < hashfunc)
 			{
@@ -197,8 +193,8 @@ NODE *newident(NODE *Tree,unsigned hashfunc,char *addrname,int classused)
 				tree=tree->leftlink ;
 			}
 	}
-	//Если переменная существует, то выводим ошибку
-	//и возвращаем ссылку на этот идентификатор
+	//If the variable exists, then we output an error
+// and return a reference to this identifier
 	if (flag == 1)
 	{
 		
@@ -206,10 +202,10 @@ NODE *newident(NODE *Tree,unsigned hashfunc,char *addrname,int classused)
 		nocode=1;
 		//return Tree;
 	}
-	//Если не найден
+	//If not found
 	else
 	{
-		//Пришли в конец - вставляем
+		//Come to the end and insert
 		if (!Tree) 
 		{
 			Tree = (NODE *) malloc(sizeof(NODE));
@@ -223,9 +219,9 @@ NODE *newident(NODE *Tree,unsigned hashfunc,char *addrname,int classused)
 			Tree->rightlink = NULL;
 			CreatedNode = Tree;
 		}
-		//Не нашли - идем дальше рекурсивно
+		//Did not find - go further recursively
 		else
-			if (hashfunc < Tree->hashvalue) // Либо влево либо вправо
+			if (hashfunc < Tree->hashvalue)
 			{
 				Tree->leftlink =newident(Tree->leftlink,hashfunc,addrname,classused);
 			}
@@ -233,15 +229,15 @@ NODE *newident(NODE *Tree,unsigned hashfunc,char *addrname,int classused)
 			{
 				Tree->rightlink =newident(Tree->rightlink ,hashfunc,addrname,classused);
 			}
-		//return Tree; //Возвращаем это дерево
+		//return Tree; //Return this tree
 	}
 	return Tree; 
 };
 
 typedef struct reestrconsts LIST;
 
-//Добавление новой константы в дескриптор перечисляемого типа.
-//Тупо вставка в начало
+// Add a new constant to the descriptor of the enumerated type.
+// insert to the beginning
 LIST* newcons(LIST *List, char *addrname)
 {
 	LIST *nov;
@@ -251,21 +247,21 @@ LIST* newcons(LIST *List, char *addrname)
 	return nov;
 }
 
-//Элемент вспомогательного списка
+//Auxiliary list item
 struct listrec
 {
 	struct treenode *id_r;
 	struct listrec *next;
 }*varlist;
 
-//Поиск идентификатора в таблице. Сам же и выдает ошибку если его там нет
-//А если есть, то возвращает ссылку на него
+// Look up the identifier in the table. It gives an error if it is not there
+// And if there is, then returns a reference to it
 NODE *SearchIdent (SCOPE* local,char *addrname,unsigned hashfunc)
 {
 	int flag=0;
 	SCOPE* current = local;
 	NODE* Tree = local->firstlocal;
-	//Поиск по дереву элемента во всех областях действия
+	//Search by element tree in all scopes of action
 	while (flag == 0)
 	{
 		Tree = current->firstlocal;
@@ -273,7 +269,7 @@ NODE *SearchIdent (SCOPE* local,char *addrname,unsigned hashfunc)
 		{
 			if ((Tree->idname == addrname))
 			{
-				flag = 1; //Нашли
+				flag = 1; //Found
 			}
 			else
 				if (Tree->hashvalue  < hashfunc)
@@ -285,19 +281,19 @@ NODE *SearchIdent (SCOPE* local,char *addrname,unsigned hashfunc)
 					Tree=Tree->leftlink ;
 				};
 		}
-		//переход на другую область действия если не нашли в этой
+		//Transition to another scope of action if not found in this one
 		if (current->enclosingscope != NULL) 
 			current = current->enclosingscope;
 		else break;
 	}
-	//Если элемент не найден - выводим ошибку о том, что имя не описано
+	//If the item is not found - we output an error that the name is not described
 	if (flag == 0)
 	{
 		
 		return NULL;
 	}
 	//else
-		//Возвращаем ссылку на этот идентификатор
+		//Return a reference to this identifier
 		return Tree;
 }
 void bssSection(NODE* tree)
@@ -319,12 +315,12 @@ void bssSection(NODE* tree)
 			}
 		}	 
  }
-//Заносит новую переменную в список переменных, ожидающих указанмя типа
-//(когда в vardeclaration описали все переменные, а тип - тока в конце написан
-//тогда все они заносятся в очередь и в конце получают тип
+// Add a new variable to the list of variables that wait for the specified type
+// (when vardeclaration described all the variables, and the type was written only at the end
+// then they are all put in the queue and at the end get the type
 void newvariable()
 {
-	//Опять просто вставка в начало списка
+	//Again just inserting to the top of the list
 	struct listrec *listentry;
 	if (symbol == ident)
 	{
@@ -337,12 +333,12 @@ void newvariable()
 	};
 };
 
-//Это как раз приписывание типа всем переменным, ожидающим в очереди
+//��� ��� ��� Assigning a type to all variables waiting in the queue
 void addattributes(int flag)
 {
 	 struct listrec *listentry, *oldentry;
 	 listentry = varlist;
-	 //Пройдем по порядочку
+	 
 	 while (listentry!=NULL)
 	 {
 		 listentry->id_r->idtype = vartype;
@@ -356,53 +352,52 @@ void addattributes(int flag)
 			listentry->id_r->casenode.vars.offset=-(listentry->id_r->casenode.vars.offset);
 		 oldentry = listentry;
 		 listentry = listentry->next;
-		 //Очищаем элемент очереди после того, как дописали
+		 //clear the element of the queue after it has been written
 		 free((void *) oldentry);
 	 }
 }
 
-//Проверка совместимости типов
+//Type Compatibility Check
  int Compatible(TYPEREC* f, TYPEREC* s)
  {
-	if ((s == NULL) || (f == NULL)) return 0; //Это если один из типов не правильный, то сразу выйдем, чтобы без ошибок
+	if ((s == NULL) || (f == NULL)) return 0; //This is if one of the types is not correct, then leave
 	if (f == s) 
 		return 1;
 	return 0;
  }
 
-//Объявления 
  TYPEREC* simpletype();
  TYPEREC* arraytype();
  TYPEREC* expression ();
  void operatore();
  TYPEREC* SimpleExpression();
 
- //Функция IsConstant возвращает 1, если символ - числовая константа.
- //Иначе возвращает 0. В переменную COnstantType заносится ссылка на дескриптор типа константы.
+ // The IsConstant function returns 1 if the character is a numeric constant.
+� // Otherwise, returns 0. A reference to a constant type descriptor is added to the COnstantType variable.
  int IsConstant(unsigned smb)
  {
     if (smb == stringc)
 	{
-		ConstantType = stringtype; //Возвращаем дескриптор типа real
+		ConstantType = stringtype; //Return a descriptor of type real
 		return 1;
 	}
 	if (smb == intc)
 	{
-		ConstantType = inttype;	//Возвращаем дескриптор типа int
+		ConstantType = inttype;	//Return a descriptor of type int
 		return 1;
 	}
 	if (smb == charc)
 	{
-		ConstantType = chartype;	//Возвращаем дескриптор типа char
+		ConstantType = chartype;	//Return a descriptor of type char
 		return 1;
 	}
 	return 0;
  }
- //Функция "тип" - проверяет синтаксис и семантику описания типа, возвращая ссылку на 
- //дескриптор этого типа
+// The "type" function checks the syntax and semantics of the type declaration, returning a reference to
+� // descriptor of this type
  TYPEREC* type (unsigned *followers)
 {
-	//Это дескриптор типа, который мы будем возвращать
+	//This is a type descriptor that we will return
 	TYPEREC* TypeEntry = NULL;
 
 	if(!belong (symbol, st_typ))
@@ -411,7 +406,7 @@ void addattributes(int flag)
 		skipto2(st_typ, followers);
 		nocode=1;
 	}
-	////возвращаем  ссылку на дескриптор простого типа
+	////Return a reference to a simple type descriptor
 	else TypeEntry = simpletype (followers);
 
 	if (!belong (symbol, followers))
@@ -420,41 +415,41 @@ void addattributes(int flag)
 		skipto1(followers);
 		nocode=1;
 	}
-	//Возврат значения
+	//Return Value
 	return TypeEntry;
 }
 
- //Функция Simpletype. Анализ простого типа. Возвращает ссылку на его дескриптор
+ //Simpletype function. Analysis of a simple type. Returns a reference to its descriptor
  TYPEREC* simpletype (unsigned *followers)
  {
 	 NODE* Ident = NULL;//, *Ident2 = NULL;
 	 TYPEREC* TypeEntry = NULL;
-	 //Нейтрализация синтаксических ошибок
+	 //Neutralization of syntax errors
 	 if (!belong (symbol, st_simpletype))
 	 {
 		 Error (18);
 		 skipto2(st_simpletype, followers);
 		 nocode=1;
 	 }
-	 //Синтаксический и семантический анализ
+	 //Syntactic and semantic analysis
 	 if (symbol == ident) 
 	 {
-		 //Находим этот идентификатор в нашей таблице
+		 //Find this identifier in our table
 		 Ident = SearchIdent(localscope, addrname, hashresult);
 		 if (Ident==NULL) {Error(104);nocode=1;}
 		 nextsym ();
-			 //Если это просто идентификатор
+			 //If it's just an identifier
 			 if ((Ident != NULL) && (Ident->clas != TYPES))
 			 {
 				 Error(100);
 				 nocode=1;
 			 }
-		 //Возвращаем значение
+		 //Return value
 		 if ((Ident != NULL)) TypeEntry = Ident->idtype;
 		 else TypeEntry = NULL;
 
 	 }
-	 //Нейтрализация синтаксических ошибок
+	 //Neutralization of syntax errors
 	 if (!belong (symbol, followers))
 	 {
 		 Error (6);
@@ -472,23 +467,23 @@ void addattributes(int flag)
 		skipto2(idstarters, followers);
 		nocode=1;
 	}
-	//Если нашли описание переменных
+	//If we have found the description of variables
 	if (symbol == ident)
 	{
-		varlist = NULL; //Инициализируем очередь переменных, ожидающих тип
-		newvariable();  //Вносим туда текущую переменную
+		varlist = NULL; //Initialize the queue of variables that expect a type
+		newvariable();  //We put the current variable there
 		localscope->localvar+=4;
 		nextsym();
 		while (symbol == comma)
 		{
 			nextsym();
-			newvariable(); //Вносим переменные в список ожидания
+			newvariable(); //Adding variables in the waiting list
 			accept(ident);
 			localscope->localvar+=4;
 		}
 		accept(colon);
-		vartype = type(followers); //Узнаем тип всех этих переменных
-		addattributes(1); //Присваиваем всем им этот тип
+		vartype = type(followers); //Find out the type of all these variables
+		addattributes(1); //Assign to all of them this type
 
 		if (!belong (symbol, followers))
 		{
@@ -499,34 +494,34 @@ void addattributes(int flag)
 	}
 }
 
- //Обработка описания массива
+ //Array description processing
  //TYPEREC* arraytype(unsigned *followers)
  //{
-	//TYPEREC* TypeEntry = newtype(ARRAYS); //Создаем новый дескриптор типа массива
+	//TYPEREC* TypeEntry = newtype(ARRAYS); //Create a new array type descriptor
 	//struct indextyp* ptr = NULL;
 
 	//accept (arraysy); 
 	//accept (lbracket); 
 
-	////Инициализируем его вариантную часть. Выделяем память
+	////We initialize its variant part. Selecting memory
 	//TypeEntry->casetype.arraytype.indextype = (struct indextyp*)malloc(sizeof(struct indextyp*));
-	////Заносим тип первого индекса в дескриптор типа массива
+	////We enter the type of the first index in an array type descriptor
 	//TypeEntry->casetype.arraytype.indextype->Type = simpletype (af_simpletype);
 
-	////Ставим указатель на первый индекс массива
+	////We put a pointer to the first index of the array
 	//ptr = TypeEntry->casetype.arraytype.indextype;
-	////NEXT делаем NULL чтобы избежать ошибок
+	////
 	//ptr->next = NULL;
 
-	////Пока запятая, считываем индексы по-очереди
+	////While a comma, read the indexes 
 	//while (symbol == comma)
 	//{
 	//	nextsym();
-	//	//Выделяем память под следующий индекс
+	//	//We allocate memory for the following index
 	//	ptr->next = (struct indextyp*)malloc(sizeof(struct indextyp*));
-	//	//Записываем этот тип в дескриптор типа массива
+	//	//We write this type into an array type descriptor
  //       ptr->next->Type = simpletype (af_simpletype);
-	//	//Переводим указатель и следующий делаем NULL
+	//	//We translate the pointer and the next do NULL
 	//	ptr = ptr->next;
 	//	ptr->next = NULL;
 	//}
@@ -534,12 +529,12 @@ void addattributes(int flag)
 	//accept (rbracket); 
 	//accept (ofsy);
 	//
-	////Тип элементов, из которых состоит массив считываем, как полагается, в конце
+	////The type of elements that make up the array is read, as it should, at the end
 	//TypeEntry->casetype.arraytype.basetype = type(followers);
 	//return TypeEntry;
  //}
  
-//Описание раздела переменных. Тут только синтаксис возможен.
+//Description of the section of variables. Here only syntax analysis.
  void varpart (unsigned *followers)
  {
 	 unsigned ptra [SET_SIZE];
@@ -576,7 +571,7 @@ int varval;
 struct idparam *funclistend;
 void newparam() 
 {
-	//пополняет список параметров
+	//Completes the list of parameters
 	struct idparam	*par;
 	if (symbol==ident){
 		par=(struct idparam*) malloc (sizeof (struct idparam));
@@ -601,7 +596,7 @@ void newparam()
 	}
 }
 
-void addpartyp() { //использует funclist и заносит тип в ТПараметров
+void addpartyp() { //Uses funclist and writes a type to the Parameter Table
 	struct idparam	*par;
 	par=LocalTree->casenode.proc.param;//funclistend;//CreatedNode->casenode.proc.param;
 	while (par->Type!=NULL) 
@@ -623,7 +618,7 @@ void groupofparam(unsigned *followers)
 	}
 	if(belong(symbol,idstarters))
 	{
-		varlist = NULL;//начало занесения в список параметров
+		varlist = NULL;//Start of the parameter list
 		newvariable();
 		newparam();
 		accept(ident);
@@ -874,7 +869,7 @@ void procfuncpart(unsigned *followers)
 	 }
 }
 
-//Блок. Только синтаксис.
+//Block. Syntax analysis only.
  void block (unsigned *followers)
  {
 	unsigned ptra[SET_SIZE];
@@ -1084,7 +1079,7 @@ void procfuncpart(unsigned *followers)
  {
 	 unsigned ptra[SET_SIZE];
 	 struct idparam *ptrparam;
-	 TYPEREC *typevar, *h_ptr;
+	 TYPEREC *typevar=NULL, *h_ptr;
 	 NODE* Ident = NULL;
 	 nextsym();
 	 ///////////
@@ -1109,8 +1104,13 @@ void procfuncpart(unsigned *followers)
 						// typevar = variable(ptra);
 						 
 						 Ident = SearchIdent(localscope, addrname, hashresult);
+						 
 						 if (Ident==NULL) {Error(104);nocode=1;}
-						 typevar = (Ident->idtype);
+						 else
+						 {
+
+						 	typevar = (Ident->idtype);
+						 }	
 						 if (!Compatible(h_ptr, typevar))
 						 {
 							 Error(189);
@@ -1144,7 +1144,7 @@ void procfuncpart(unsigned *followers)
 					}
 		//		 accept(ident);
 			 } while (symbol == comma && ptrparam!=NULL);
-			 if (ptrparam!=NULL) //если число формальных и факт парам-в не равно
+			 if (ptrparam!=NULL) //If the number of formal parameters is not equal to the fact parameters 
 			 {
 				 Error(126);
 				 nocode=1;
@@ -1153,14 +1153,14 @@ void procfuncpart(unsigned *followers)
 		 }
 	 }
  }
- //Оператор.
+ //Operator.
  void operatore (unsigned *followers)
  {
 	 int localLabelCounter = ++labelCounter;
 	 int llC;
-	 TYPEREC* exptyp;	//Тип выражения
-	 NODE* cond = NULL /*Идентификатор-условие*/, *caseid = NULL /**/; 
-	 struct textposition currentpos, exprpos; //Позиция в тексте (чтобы вывести ошибку в нужном месте)
+	 TYPEREC* exptyp;	//Type of expression
+	 NODE* cond = NULL /*Condition identifier*/, *caseid = NULL /**/; 
+	 struct textposition currentpos, exprpos; //Position in the text (to get the error in the right place)
 	 unsigned ptra [SET_SIZE];
 
 	 if (!belong (symbol, st_statement))
@@ -1169,7 +1169,7 @@ void procfuncpart(unsigned *followers)
 		 skipto2(st_statement, followers);
 		 nocode=1;
 	 }
-	 //Составной оператор. Семантики у него нет
+	 //Composite operator. 
 	 if (symbol == beginsy)
 	 {
 		 SetDisjunct (af_compstatement, followers, ptra);
@@ -1182,24 +1182,24 @@ void procfuncpart(unsigned *followers)
 		 }
 		 accept (endsy);
 	 }
-	 //Условный оператор
+	 //If statement
 	 else if (symbol == ifsy)
 	 {
 
 		 SetDisjunct (af_iftrue, followers, ptra);
 		 accept (ifsy);
 
-		 exprpos = token; //Запоминаем позицию в тексте
+		 exprpos = token; //Remember the position in the text
 		 llC=localLabelCounter;
 		 localLabelCounter = ++labelCounter;
-		 exptyp = expression (ptra); //Анализируем выраженеи
+		 exptyp = expression (ptra); //analyze expression
 		 localLabelCounter = ++labelCounter;
-		 currentpos = token; //Записываем позицию после выражения
-		 if ((exptyp == NULL) || (!Compatible(exptyp, booltype))) //Если тип не совместим с булевым
+		 currentpos = token; //Write the position after the expression
+		 if ((exptyp == NULL) || (!Compatible(exptyp, booltype))) //If the type is not compatible with Boolean
 		 {
-			 token = exprpos; //Вернемся назад
-			 Error(145);	//Выведем ошибку
-			 token = currentpos; //И обратно вперед
+			 token = exprpos; //go back
+			 Error(145);	//Report an error
+			 token = currentpos; //And back forward
 			 nocode=1;
 		 }
 
@@ -1242,23 +1242,23 @@ void procfuncpart(unsigned *followers)
 		 fprintf(output,"L%d:\n", llC);
 		 labelCounter=localLabelCounter;
 	 }
-	 //Оператор цикла с параметром
+	 //Loop Operator with Parameter
 	 //else if (symbol == forsy)
 	 //{
 		// accept (forsy);
-		// //Нахождение идентификатора-индекса
+		// //Finding an identifier-index
 		// cond = SearchIdent(localscope, addrname, hashresult); 
 		// if (cond==NULL) Error(104);
-		// //Проверка класса использования
+		// //Verify class of use
 		// if ((cond != NULL) && (cond->clas != VARS))
 		//	 Error(100);
 		// accept (ident);
 		// accept (assign);
 		// SetDisjunct(followers, af_for1, ptra);
-		// exprpos = token; //Позицию запоминаем
-		// exptyp = expression (ptra); //Анализируем тип выражения
-		// currentpos = token; //Запоминаем позиицю после выражения
-		// if ((cond != NULL) && (!Compatible(cond->idtype, exptyp))) //Проверяем его корректность и совместимость
+		// exprpos = token; //The position is memorized
+		// exptyp = expression (ptra); //analyze the type of expression
+		// currentpos = token; //We remember the position after expression
+		// if ((cond != NULL) && (!Compatible(cond->idtype, exptyp))) //We check its correctness and compatibility
 		// {
 		//	 token = exprpos;
 		//	 Error(145);
@@ -1274,10 +1274,10 @@ void procfuncpart(unsigned *followers)
 		// if (symbol == tosy) accept (tosy);
 		// else accept (downtosy);
 		// SetDisjunct(af_whilefor, followers, ptra);
-		// exprpos = token; //Снова то же самое по запоминанию позиции в тексте, чтобы вывести ошибку
-		// exptyp = expression (ptra); //Анализ выражения
+		// exprpos = token; //Again, the same is to memorize the position in the text to display an error
+		// exptyp = expression (ptra); //The analysis of the expression
 		// currentpos = token;
-		// if ((cond != NULL) && (!Compatible(cond->idtype, exptyp))) //Проверка совместимости типа
+		// if ((cond != NULL) && (!Compatible(cond->idtype, exptyp))) //Type compatibility check
 		// {
 		//	 token = exprpos;
 		//	 Error(145);
@@ -1357,7 +1357,7 @@ void procfuncpart(unsigned *followers)
 		if (exptyp != booltype) {Error (135);nocode=1;}
 
 	 }
-	 //Присваивание
+	 //Assignment
 	 else if (symbol == ident)
 	 {
 		 NODE* Ident = NULL;
@@ -1415,9 +1415,9 @@ void procfuncpart(unsigned *followers)
  }
 
  
-//Проверки арифметических операция - тупо перебором
+//Arithmetic operation checks - ���� ���������
 
- //Проверка выражения на принадлежность логическому типу
+ //Checking an expression for belonging to a logical type
 TYPEREC* logical(TYPEREC* exptype)
 {
 	if (exptype == NULL) return NULL;
@@ -1428,7 +1428,7 @@ TYPEREC* logical(TYPEREC* exptype)
 	return NULL;
 }
 
-//Проверка корректности умножения
+//Checking the correctness of multiplication
 TYPEREC* test_mult(TYPEREC* exptype1, TYPEREC* exptype2)
 {
 	if ((exptype1 == NULL) || (exptype2 == NULL)) return NULL;
@@ -1441,7 +1441,7 @@ TYPEREC* test_mult(TYPEREC* exptype1, TYPEREC* exptype2)
 	return NULL;
 }
 
-//Проверка корректности сложения
+//Checking the correctness of addition
 TYPEREC* test_add(TYPEREC* exptype1, TYPEREC* exptype2)
 {
 	if ((exptype1 == NULL) || (exptype2 == NULL)) return 0;
@@ -1454,7 +1454,7 @@ TYPEREC* test_add(TYPEREC* exptype1, TYPEREC* exptype2)
 	return NULL;
 }
 
-//Проверка корректности сравнения
+//Checking the correctness of the comparison
 TYPEREC* test_comparing(TYPEREC* exptype1, TYPEREC* exptype2, unsigned operation)
 {
 	if ((exptype1 == NULL) || (exptype2 == NULL)) return 0;
@@ -1469,19 +1469,19 @@ TYPEREC* test_comparing(TYPEREC* exptype1, TYPEREC* exptype2, unsigned operation
 	return NULL;
 }
 
-//Проверка правильности знака перед выражением
+//Checking  the sign before the expression
 int right_sign(TYPEREC* exptype)
 {
 	if (exptype == NULL) return 0;
 	return ((exptype == inttype));
 }
 
-//Выражение
+//Expression
  TYPEREC* expression (unsigned *followers)
  {
 
-	 TYPEREC* ex1type = NULL, *ex2type; //Типы операндов
-	 unsigned operation; //Код операции
+	 TYPEREC* ex1type = NULL, *ex2type; //Types of operands
+	 unsigned operation; //Operation code
 	 int localLabelCounter=++labelCounter;
 	 if (!belong (symbol, st_express))
 	 {
@@ -1489,14 +1489,14 @@ int right_sign(TYPEREC* exptype)
 		 skipto2(st_express, followers);
 		 nocode=1;
 	 }
-	 ex1type = SimpleExpression (followers); //Тип первого выражения
-	 //Если символ - символ операции сравнения
+	 ex1type = SimpleExpression (followers); //Type of first expression
+// If the character is a symbol of the comparison operation
 	 if (belong(symbol, op_rel))
 	 {
-		 operation = symbol; //Запомним операцию
+		 operation = symbol; 
 		 nextsym();			
-		 ex2type = SimpleExpression (followers);	//Тип второго выражения
-		 ex1type = test_comparing(ex1type, ex2type,operation); //Проверка совместимости
+		 ex2type = SimpleExpression (followers);	//Type of second expression
+		 ex1type = test_comparing(ex1type, ex2type,operation); //Compatibility check
 	 
 	 if (!nocode)
 	 {
@@ -1540,19 +1540,19 @@ int right_sign(TYPEREC* exptype)
 	 return ex1type;
  }
 
- //Множитель
+ //FActor
  TYPEREC* factor (unsigned *followers)
  {
 	unsigned ptra [SET_SIZE];
 	TYPEREC* exptype = NULL;
-	NODE* node; //Указатель на вершину ТИ для текущего идентификатора
+	NODE* node; //A pointer to the top of the identifier table for the current identifier
 	 if (!belong (symbol, st_termfact))
 	 {
 		 Error(6);
 		 skipto2(st_termfact, followers);
 		 nocode=1;
 	 }
-	 //Либо это константа
+	 // this is a constant
 	 if (IsConstant(symbol))
 	 {
 		 exptype = ConstantType;
@@ -1577,13 +1577,13 @@ int right_sign(TYPEREC* exptype)
 		 }
 		 nextsym ();
 	 }
-	 //Либо идентификатор
+	 // this is an identifier
 	 else if (symbol == ident)
 	 {
-		 //Находим его
+		 // find it
 		node = SearchIdent(localscope, addrname, hashresult);
 		if (node==NULL) { Error(104); exptype = NULL; nocode=1;}
-		//Узнаем тип
+		//get the type
 		else
 			switch(node->clas)
 		{
@@ -1630,21 +1630,20 @@ int right_sign(TYPEREC* exptype)
 		}
 		//else
 		//	exptype = NULL;//StandartFunc(followers);//NULL;
-		// !!!!!!!!!!!!!!!! закомменнчено, но не факт,что верно 
 	 }
-	 //Скобка
+	 //left parenthesis
 	 else if (symbol == leftpar)
 	 {
 		 nextsym();
-		 //Анализируем выражение в скобках
+		 //Expression analisys
 		 exptype = expression (followers);
 		 accept (rightpar);
 	 }
-	 //Если NOT 
+	 //if NOT 
 	 else if (symbol == notsy)
 	 {
 		 accept (notsy);
-		 //Анализируем выражение и проверку его принадлежности к логическим
+		 //We analyze the expression and check its belonging to logical
 		 exptype = factor (followers);
 		 exptype = logical(exptype);
 		 fprintf(output,"pop eax\n");
@@ -1654,9 +1653,9 @@ int right_sign(TYPEREC* exptype)
 	 else exptype = NULL;
 	 return exptype;
  }
- void multop (unsigned operation /* код операции */,
-                   TYPEREC *exptype   /* указатель на дескриптор типа
-                                                    результата операции */)
+ void multop (unsigned operation /* operation code
+ */,
+                   TYPEREC *exptype   /* Pointer to the operation result type descriptor */)
 { 
 
     switch ( operation )
@@ -1680,10 +1679,10 @@ int right_sign(TYPEREC* exptype)
     }
 }
 
- //Слагаемое
+ //term
 TYPEREC* composed (unsigned *followers)
  {
-	 TYPEREC* ex1type = NULL, *ex2type; //Типы операндов
+	 TYPEREC* ex1type = NULL, *ex2type; //Types of operands
 	 unsigned operation;
 	 if (!belong(symbol, st_termfact))
 	 {
@@ -1691,19 +1690,19 @@ TYPEREC* composed (unsigned *followers)
 		 skipto2(st_termfact, followers);
 		 nocode=1;
 	 }
-	 ex1type = factor (followers); //Проверка типа множителя
+	 ex1type = factor (followers); //Checking the type of multiplier
 
-	 while (belong(symbol, op_mult)) //Если символ - операции умножения/деления и т.п.
+	 while (belong(symbol, op_mult)) //If the symbol is multiplication / division, etc.
 	 { 
-		 operation = symbol; //Запоминаем операцию
+		 operation = symbol;
 		 nextsym();
-		 ex2type = factor (followers); //Разбираемся с типами
+		 ex2type = factor (followers); //get types
          if ( !nocode )
 		 {
             fprintf(output,"pop ebx\n");
             fprintf(output,"pop eax\n");
 		 }
-		 ex1type = test_mult(ex1type, ex2type); //Проверка корректности
+		 ex1type = test_mult(ex1type, ex2type); //Compatibility check
          if ( !nocode )
 		 {
 			 multop ( operation, ex1type );
@@ -1715,20 +1714,20 @@ TYPEREC* composed (unsigned *followers)
 	 return ex1type;
  }
 
-//Простое выражение
+
  TYPEREC* SimpleExpression (unsigned *followers)
  {
 	 TYPEREC* ex1type, *ex2type;
 	 unsigned operation, sign = 0;
-	 if ((symbol == minus) || (symbol == plus)) { sign = 1; nextsym(); } //Проверка знака
-	 ex1type = composed (followers);	 //Узнаем тип простого выражения
-	 if(sign) //Был ли знак
+	 if ((symbol == minus) || (symbol == plus)) { sign = 1; nextsym(); } //Sign checking
+	 ex1type = composed (followers);	 //get the type of a simple expression
+	 if(sign) //if there is a sign then check
 		 right_sign(ex1type);
-	 while (belong(symbol, op_add)) //Проверка на принадлежность символа к операциям сложения/вычитания и т.п.
+	 while (belong(symbol, op_add)) //Checking whether the character belongs to addition / subtraction, etc.
 	 {
-		 operation = symbol; //Запоминаем операции
+		 operation = symbol; 
 		 nextsym(); 
-		 ex2type = composed (followers); //Узнаем тип второго выражения
+		 ex2type = composed (followers); //get the type of the second expression
 		 ex1type = test_add(ex1type, ex2type);//, operation);
 		 if (!nocode)
 		 {
@@ -1753,56 +1752,54 @@ TYPEREC* composed (unsigned *followers)
 	 return ex1type;
  }
 
- //Функция programme. Создает фиктивную область действия и проверяет программу
+ //Function programme. Creates a fictive scope and checks the program
  void programme()
  {
-	//Организация фиктивной области действия
-	//Открываем стек области действия - localscope->firstlocal
+	//Organization of fictive scope
+	//Open the activity scope stack - localscope->firstlocal
 	open_scope();
-	//Создаем логический тип
+	//Create a Boolean Type
 	booltype = newtype(ENUMS);
 	
-	//Добавляем в его дескриптор константы
 	SearchInTable("false"); 
-	//SearchInTable находит идентификатор в таблице,
-	//Заносит значение hash-функции в hashresult, адрес в таблице имен - в addrname.
-	//newident изменяет копию localscope->firstlocal. А в переменную CreatedNode newident заносит указатель на созданную вершину
+// SearchInTable finds the identifier in the table,
+// Write the value of the hash function in hashresult, the address in the name table is in addrname.
+// newident changes the copy of localscope-> firstlocal. And in the CreatedNode variable, newident writes a pointer to the created vertex
 	localscope->firstlocal = newident(localscope->firstlocal, hashresult, addrname, CONSTS);
-	//CreatedNode - переменная, обозачающая текущую вершину. Ту, которую мы создали
-	//Функцией newident
-	//Теперь зададим в нем ссылку на дескриптор типа
+	//CreatedNode - A variable that overrides the current vertex. The one we created by
+// Function newident
+// Now we specify in it a reference to the type descriptor
 	CreatedNode->idtype = booltype;
-	//Добавим константку false в дескриптор логисечкого типа
+	Add the constant false to the logical type descriptor
 	booltype->casetype.firstconst = newcons(booltype->casetype.firstconst, addrname);
 	CreatedNode->casenode.constvalue.boolval = 0;
-	//Сделаем то же самое с true
+	//The same with true
 	SearchInTable("true");
 	localscope->firstlocal = newident(localscope->firstlocal, hashresult, addrname, CONSTS);
 	CreatedNode->idtype = booltype;
 	booltype->casetype.firstconst = newcons(booltype->casetype.firstconst, addrname);
 	CreatedNode->casenode.constvalue.boolval = 1;
-	//Создадим остальные основные типы
+	//create the other basic types
 	chartype = newtype(SCALARS);
 	stringtype=newtype(STRINGS);
 	inttype = newtype(SCALARS);
 
-	//Создаем дескриптор типа integer
+	//Create an integer descriptor
 	SearchInTable("integer");
-	//Создадим идентификатор для integer, т.к. мы уже нашли addrname и hashresult
+	//create an identifier for integer. We already found addrname and hashresult
 	localscope->firstlocal = newident(localscope->firstlocal, hashresult, addrname, TYPES);
-	//Вставим в этот идентификатор ссылку на тип Integer (inttype)
+	//Insert in this identifier a reference to the type Integer (inttype)
 	CreatedNode->idtype = inttype;
-
-	//Это - константа. 
+	
 	SearchInTable("maxint");
-	//Создадим идентификатор
+	//Create an identifier
 	localscope->firstlocal = newident(localscope->firstlocal, hashresult, addrname, CONSTS);
-	//Запишем ее тип
+	//write its type
 	CreatedNode->idtype = inttype;
-	//Создадим значение в ней
+	//create a value
 	CreatedNode->casenode.constvalue.intval = 32767;
 
-	//Далее все аналогично операциям с Integer
+	//Further all is similar to operations with Integer
 	SearchInTable("char");
 	localscope->firstlocal = newident(localscope->firstlocal, hashresult, addrname, TYPES);
 	CreatedNode->idtype = chartype;
@@ -1837,7 +1834,7 @@ TYPEREC* composed (unsigned *followers)
 	CreatedNode->casenode.proc.io = 4;
 	//CreatedNode->casenode.proc.param=funclistend;
 
-	//Фиктивная область создана. Теперь откроем область 
+	//The active scope is created. Now open the scope
 	open_scope();
 	output=fopen("output.asm","w");
     fprintf(output,"extern printf\n");
@@ -1848,7 +1845,7 @@ TYPEREC* composed (unsigned *followers)
     fprintf(output,"extern malloc\n");
     fprintf(output,"extern memcpy\n");
     fprintf(output,"extern free\n\n");
-	//Начало проверки
+	//Start of analisys
 	accept (programsy);
 	accept (ident);
 	accept (semicolon);

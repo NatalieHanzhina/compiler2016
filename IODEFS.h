@@ -1,13 +1,13 @@
 
 
 /*
-			Описания для блока ввода-вывода
-				Файл IODEFS.H
+			CONSTS FOR I/O BLOCK 
+				File IODEFS.H
 */
 
-#define ERRMAX		10	/* максимум ошибок в строке		*/
-#define MAXLEN          80      /* максимальная длина строки 		*/
-#define MAXSTR  	100   	/* максимальная длина строки 		*/
-#define MAXMES  	400 	/* максимальное кол-во сообщений в файле  */
-				/* сообщений об ошибках 		*/
-#define FNAME		12	/* имя файла с расширением 		*/﻿
+#define ERRMAX		10	/* max number of errors per string		*/
+#define MAXLEN          80      /* max string length 		*/
+#define MAXSTR  	100   	/* max number of strings 		*/
+#define MAXMES  	400 	/* max number of error types */
+				
+#define FNAME		12	/* filename 		*/

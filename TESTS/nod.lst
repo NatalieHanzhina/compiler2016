@@ -1,0 +1,24 @@
+               Работает Pascal - компилятор 
+                   Листинг программы
+   1  program example1; 
+   2  var c,d,n:integer; 
+   3   
+   4  function nod(a, b: integer):integer;  
+   5  begin  
+   6  while a * b <> 0 do  
+   7  begin 
+   8  if a > b  
+   9  then a:= a mod b  
+  10  else b:= b mod a;  
+  11  end; 
+  12  nod:= a + b;  
+  13  end; 
+  14   
+  15  begin 
+  16    readln(c); 
+  17    readln(d); 
+  18    n:=nod(c,d); 
+  19    writeln(n); 
+  20  end. 
+
+Кoмпиляция окончена: ошибок нет !

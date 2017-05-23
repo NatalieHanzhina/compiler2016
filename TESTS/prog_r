@@ -1,17 +1,17 @@
 program example1;
 var a,b,l:integer;
 	
-function f(c:integer):integer;
+function inc(c:integer):integer;
 
 	begin
-		f:=c+1;
+		inc:=c+1;
 	end;
 begin
   read(a);
   while a<10 do
   begin
-     a:=f(a);
+     a:=inc(a);
   end;
-  if a>10 then
+  if a>=10 then
   write(a);
 end.

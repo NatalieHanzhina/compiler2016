@@ -1,11 +1,11 @@
-﻿
 
-     /*  ФАЙЛ  TEXTP.H                            */
 
-     /*  СТРУКТУРА - ПОЗИЦИЯ  СИМВОЛА  В  ТЕКСТЕ  */
+     /*  FILE TEXTP.H                            */
+
+     /*  STRUCTURE - POSITION OF SYMBOL IN TEXT  */
 
      struct textposition
 	    {
-	    unsigned linenumber;       /* номер  строки  символа */
-	    unsigned short charnumber; /* номер  позиции символа */
+	    unsigned linenumber;       /* line number */
+	    unsigned short charnumber; /* position number */
 	    };

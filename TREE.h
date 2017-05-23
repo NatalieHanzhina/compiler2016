@@ -1,12 +1,14 @@
 
 /*
-			      ФАЙЛ  TREE.H
-	     Описание типов идентификаторов   */
+			      FILE  TREE.H
+	     Identifier types definition  */
 
-/* Способ использования идентификатора: */
-#define TYPES      121   /* ТИП */
-#define CONSTS     122   /* КОНСТАНТА */
-#define VARS       123   /* ПЕРЕМЕННАЯ */
-#define PROCS      124   /* ПРОЦЕДУРА */
-#define FUNCS      125   /* ФУНКЦИЯ   */
+/* The way of using identifier: */
+#define TYPES      121   /* TYPE*/
+#define CONSTS     122   /* CONSTANT */
+#define VARS       123   /* VARIABLE */
+#define PROCS      124   /* PROCEDURE */
+#define FUNCS      125   /* FUNCTION   */
+
+
 

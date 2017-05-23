@@ -1,13 +1,13 @@
-﻿
 
-      /* ФАЙЛ  ERR.H                    */
+
+      /* FILE  ERR.H                    */
        #include "TEXTP.h"
 
-      /* структура - данные об  ошибках */
+      /* errors data structure */
       struct E
 	    {
 	    struct textposition errorposition;
-	      /* место  ошибки */
-	    unsigned errorcode;                 /* код    ошибки */
+	      /* �error coordinates */
+	    unsigned errorcode;                 /* error code */
 	    };
 

@@ -1,71 +1,58 @@
 
 
 
-      /*  ФАЙЛ    TYPET.H               */
+      /* fILE   TYPET.H               */
 
-      /* ФАЙЛ ВНЕШНИХ ПЕРЕМЕННЫХ */
+      /* FILE OF EXTERNAL VARIABLES */
 
 
-#define TOUT		/* Открытие и закрытие файла t.out		*/
+#define TOUT		/* t.out		*/
 #include <stdio.h>
 
-#define maxint 	   32767/* максимальное целое значение ( при переносе 	*/
-	/* на asm изменить! )					*/
-#define SET_SIZE   8	/* количество слов для хранения битовой строки 	*/
-	/* 				*/
-#define LATDIF     32	/* разность между кодами соответствующих строч- */
-	/* ной и заглавной латинскими буквами в кодировке ASCII		*/
+#define maxint 	   32767/* Maximum integer value 				*/
+#define SET_SIZE   8	/* Number of words for storing the bit string 	*/
+
+#define LATDIF     32	/* The difference between the codes corresponding to the lowercase and uppercase letters in coding ASCII		*/
 #define RUSDIF1    32	/* */
 #define RUSDIF2    80   /* */
-#define WORDLENGTH 32	/* длина минимальной адресуемой информационной 	*/
-	/* единицы в битах		*/
-#define STR_LENGTH 4	/* длина минимальной адресуемой информационной 	*/
-	/* единицы в байтах		*/
-#define INT_LENGTH 4	/* длина минимальной адресуемой информационной 	*/
-	/* единицы в байтах		*/
-#define BOOL_LENGTH 4	/* длина минимальной адресуемой информационной 	*/
-	/* единицы в байтах		*/
-#define MAXORDER   308	/* максимальный допустимый порядок вещественной */
-	/* константы с нормализованной мантиссой 					*/
+#define WORDLENGTH 32	/* The length of the minimum addressable information unit in bits		*/
+#define STR_LENGTH 4	/* The length of the minimum addressable information unit in bytes	*/
+#define INT_LENGTH 4	/* The length of the minimum addressable information unit in bytes		*/
+#define BOOL_LENGTH 4	/* The length of the minimum addressable information unit in bytes	*/
+#define MAXORDER   308	/* The maximum permissible order of a real constant with a normalized mantissa 					*/
 #define labelquality 2
 #include "IODEFS.h"
 #include "ERR.h"
 
 
-      extern   struct  textposition   positionnow,/* позиция текущей литеры */
-					 /* 1-е описание - в файле "main.c" */
-				      token,     /* позиция текущей лексемы */
-					 /* 1-е описание - в файле "main.c" */
-				      next;    /* позиция следующей лексемы */
-					 /* 1-е описание - в файле "main.c" */
-      extern   char    name[79];                                     /* имя */
-					 /* 1-е описание - в файле "main.c" */
-      extern   int     nmbi;                    /* значение целой константы */
-					 /* 1-е описание - в файле "main.c" */
-      extern   double  nmbf;             /* значение вещественной константы */
-					 /* 1-е описание - в файле "main.c" */
-      extern   int     onesymbol;          /* значение символьной константы */
-					 /* 1-е описание - в файле "main.c" */
-      extern   char    strings[MAXLEN];     /* значение строковой константы */
-					 /* 1-е описание - в файле "main.c" */
-      extern   int     ch;                    /* текущая сканируемая литера */
-					 /* 1-е описание - в файле "main.c" */
-      extern   char   *addrname;     /* адрес текущего имени в таблице имен */
-				     /* 1-е описание - в файле "rumtabl3.c" */
-      extern   unsigned          errorcode;                   /* код ошибки */
-					 /* 1-е описание - в файле "main.c" */
-      extern   unsigned          symbol;             /* код текущей лексемы */
-					 /* 1-е описание - в файле "main.c" */
-      extern   unsigned          hashresult;  /* результат hash-функции для */
-							  /* текущего имени */
-				     /* 1-е описание - в файле "rumtabl3.c" */
-      extern   unsigned          nextsymbol;       /* код следующей лексемы */
-					 /* 1-е описание - в файле "main.c" */
-      extern   unsigned short    cnt;                        /* для отладки */
-					 /* 1-е описание - в файле "main.c" */
+      extern   struct  textposition   positionnow,/* Current letter position */
+				      token,     /* Current token position */
+				      next;    /* Next token position */
+      extern   char    name[79];                                     /* name */
+      extern   int     nmbi;                    /* The value of an integer constant */
+      extern   double  nmbf;             /* Value of the real constant */
+				
+      extern   int     onesymbol;          /* Character constant value */
+
+      extern   char    strings[MAXLEN];     /* String constant value */
+					 
+      extern   int     ch;                    /* Current scanned letter */
+					 
+      extern   char   *addrname;     /* Address of the current name in the table of names */
+				     
+      extern   unsigned          errorcode;                   /* error code */
+					 
+      extern   unsigned          symbol;             /* Current token code */
+					 
+      extern   unsigned          hashresult;  /* The result of the hash function for the current name */
+				     
+      extern   unsigned          nextsymbol;       /* Next token code */
+					 
+      extern   unsigned short    cnt;                       
+					 
       extern   unsigned short    lname;
-				/* длина идентификатора или ключевого слова */
-					 /* 1-е описание - в файле "main.c" */
+				/* Length of identifier or keyword */
+					 
       extern   FILE 	    	*t,     
 				*mesfile,
 				*dstfile,
@@ -76,14 +63,13 @@
 				 sfile[ FNAME ],
 				 dfile[ FNAME ];
 
-      extern   short 		 LastInLine,   /* значащие символы в строке */
-				 ErrInx, /* число сделанных в строке ошибок */
-				 ErrorOverflow,/* TRUE-слишком много ошибок,*/
-							 /* FALSE-нормально */
-				 ErrorCount; /* число сделанных в программе */
-								  /* ошибок */
+      extern   short 		 LastInLine,   /* significative characters in a string */
+				 ErrInx, /* The number of errors made in the line */
+				 ErrorOverflow,/* TRUE-Too many errors,*/
+							 /* FALSE- normal */
+				 ErrorCount; /* The number of errors made in the program */
 
-      extern   struct E 	 Errlist[ ERRMAX ];        /* список ошибок */
+      extern   struct E 	 Errlist[ ERRMAX ];        /* errors list */
 
       extern   struct textposition positionnow;
       extern
@@ -93,129 +79,93 @@
 
 
 
-/* Описание реализуемых в виде битовых строк множеств символов, 	*/
-/* стартовых для различных обрабатываемых конструкций:			*/
-/* первое описание - в файле main.c					*/
+/* Description of the sets of characters implemented in the form of bit strings, starting symbols for various processed structures:			*/
+
 
 extern unsigned
 
-*idstarters,		/* стартовый символ ident			*/
-*begpart,		/* стартовые символы функции block()		*/
-*rpar,			/* ... правая скобка 				*/
-*st_constpart,		/* стартовые символы функции constpart()	*/
-*st_typepart,		/* стартовые символы функции typepart()		*/
-*st_varpart,		/* стартовые символы функции varpart()		*/
-*st_procfuncpart,	/* стартовые символы функции procfuncpart()	*/
-*st_statpart,		/* стартовые символы функции statpart()		*/
-*st_constant,	 	/* стартовые символы функции constant()		*/
-*st_conaftersign,	/* стартовые символы конструкции константы, 	*/
-	/* идущей после знака + или -					*/
-*st_typ,		/* стартовые символы функции typ()		*/
-*st_typafterpack,	/* стартовые символы конструкции описания типа 	*/
-	/* после ключевого слова packedsy				*/
-*st_simpletype,	/* стартовые символы функции simpletype()	*/
-*st_fixpart,           /* стартовые символы функции fixpart()	и	*/
-	/* функции reestrfields()					*/
-*st_casefield,         /* стартовые символы функции casefield()	*/
-*st_statement,          /* стартовые символы конструкции <оператор>     */
-*st_startstatement,     /* стартовые символы оператора при нейтрализации*/
-*st_variant,            /* стартовые символы конструкции <вариант> в    */
-	 /* операторе варианта                                          */
-*st_express,		/* ... выражения 				*/
-*st_termfact;		/* ... слагаемого и множителя 			*/
+*idstarters,		/* single start char - ident */
+*begpart,		/* start char for block()		*/
+*rpar,			/* right parenthesis  				*/
+*st_typepart,		/* start chars for typepart()		*/
+*st_varpart,		/* start chars for varpart()		*/
+*st_procfuncpart,	/* start chars for procfuncpart()	*/
+*st_statpart,		/* start chars for statpart()		*/
+*st_constant,	 	/* start chars for constant()		*/
+*st_conaftersign,	/* start chars for const, 	*/
+	/* after plus/minus sign					*/
+*st_typ,		/* start chars for typ()		*/
+*st_simpletype,	/* start chars for simpletype()	*/
+*st_statement,          /* start chars for construction <operator>     */
+*st_startstatement,     /* start chars for operator*/
+*st_express,		/* start chars for expression 				*/
+*st_termfact;		/* start chars for term, factor 			*/
 
-/* Описание реализуемых в виде битовых строк множеств символов, 	*/
-/* ожидаемых сразу после обработки различных конструкций:		*/
-/* первое описание - в файле main.c					*/
+
+/* �������� ����������� � ���� ������� ����� �������� ��������, 	*/
+/* ��������� ����� ����� ��������� ��������� �����������:		*/
+/* ������ �������� - � ����� main.c					*/
 
 extern unsigned
 
-*blockfol,		/* ...после обработки блока основной программы  */
-*af_1constant,		/* ...после обработки константы при вызове	*/
-	/* constant() из constdeclaration(), а также после обработки 	*/
-	/* объявления типа при вызове vardeclaration() из varpart()	*/
-*af_2constant,		/* ...после анализа константы при вызове функ-	*/
-	/* ции constant() из функции casefield()			*/
-*af_3const1,		/* ...после анализа первой константы отрезка	*/
-	/* при обработке оного в функции simpletype()			*/
-*af_4const2,		/* ...после анализа второй константы отрезка	*/
-	/* при обработке оного в функции simpletype()			*/
-*af_simpletype,		/* ...после анализа конструкции типа индекса во */
-	/* время обработки типа массива					*/
-*af_1typ,		/* ...после анализа конструкции описания типа	*/
-	/* при вызове функции typ() из typedeclaration()		*/
-*af_2typ,		/* ...после анализа конструкции описания типа	*/
-	/* при вызове функции typ() из fixpart()			*/
-*af_1reestrfields,	/* ...после анализа конструкции списка полей 	*/
-	/* при вызове функции reestrfields() из функции complextype()	*/
-*af_2reestrfields,	/* ...после анализа конструкции списка полей,	*/
-	/* вложенного внутри записи, т.е. при вызове reestrfields() из	*/
-	/* casefield()							*/
-*af_fixpart,		/* ...после анализа фиксированной части списка 	*/
-	/* полей 							*/
-*af_proclistparam,      /* ...после анализа списка параметров процедуры */
-*af_funclistparam,      /* ...после анализа списка параметров функции   */
-*af_blockprocfunc,      /* ...после анализа блока процедуры или функции */
-*af_sameparam,          /* ...после анализа однотипных параметров       */
-*af_factparam,          /* ...после анализа фактических параметров      */
-	/* процедур и функций                                           */
-*af_oneparam,           /* ...после анализа параметра стандартных       */
-	/* процедур и функций, имеющих один параметр                    */
-*af_writeparam,         /* ...после анализа параметра стандартных       */
-	/* процедур write и writeln                                     */
-*af_assignment,         /* ...после анализа переменной в операторе      */
-	/* присваивания							*/
-*af_compstatement,      /* ...после анализа оператора в составном оп-ре */
-*af_iftrue,             /* ...после анализа условного выражения в опера-*/
-	/*торе if							*/
-*af_iffalse,            /* ...после анализа оператора ветви "истина" в  */
-	/* операторе if							*/
-*af_whilefor,		/* ...после анализа условного выражения в опера-*/
-	/* торе while и выражения-второй границы изменения параметра    */
-	/* цикла в операторе for					*/
-*af_repeat,             /* ...после анализа оператора в теле цикла repeat*/
-*af_with,               /* ...после анализа  переменной  в   заголовке  */
-	/* оператора with						*/
-*af_case1,              /* ...после анализа выбирающего выражения в case*/
-*af_case2,              /* ...после анализа варианта в операторе case   */
-*af_forassign,	        /* ...после анализа переменной в операторе for	*/
-*af_for1, 		/* ...после анализа выражения-первой границы из-*/
-	/* менения параметра цикла в операторе for			*/
-*af_ident,		/* ...после идентификатора в "переменной"	*/
-*af_index,		/* ...после индекса при разборе массива		*/
-*af_set1,		/* ...после 1-го выражения в конструкторе множ. */
-*af_label,              /* ... после константы в разделе описания меток*/
-*af_label1,             /* ... после раздела описания меток */
-*af_goto;               /* ... после goto                                */
-/**af_var1; */               /* ... после раздела описания переменных*/
+*blockfol,		/* ...after processing of main program block  */
+*af_1constant,		/* ...after processing of const while calling	*/
+	/* constant() from constdeclaration(), also after  */
+	/* analysis of constrution of declaration variables while calling */
+	/* vardeclaration() from varpart()			*/
+*af_3const1,		/* ...after processing of first const	*/
+	/* into simpletype()			*/
+*af_4const2,		/* ...after processing of second const	*/
+	/* into simpletype()			*/
+*af_1typ,		/* ...after processing of type construction	*/
+	/* while calling typ() from typedeclaration()		*/
+*af_2typ,		/* ... after analyzing the construction of the type declaration */
+/* When calling the typ () function from fixpart () */
+*af_proclistparam,      /* ... after analyzing the list of procedure parameters */
+*af_funclistparam,      /* ... after analyzing the list of function parameters   */
+*af_blockprocfunc,      /* ... after analyzing the procedure or function block */
+*af_sameparam,          /* ... after analyzing the same parameters       */
+*af_factparam,          /* ... after analyzing the actual parameters      */
+	/* of procedure or function                                         */
+*af_oneparam,           /* ... after analyzing the standard parameter * /
+/* of Procedures and functions that have one parameter                   */
+*af_writeparam,         /* ...After analyzing the parameter of standard       */
+	/* procedures write and writeln                                     */
 
-/* Описание реализуемых в виде битовых строк множеств допустимых симво- */
-/* лов операций в разделе компиляции выражений 				*/
+*af_assignment,         /* ...After analyzing the variable in the assign statement      */
+*af_compstatement,      /* ...After the analysis of the operator in the composite operator */
+*af_iftrue,             /* ...After analyzing the conditional expression in the if statement*/
+
+*af_iffalse,            /* ...After analyzing the operator of the branch "true" in if statement */
+
+*af_whilefor,		/* ...After analyzing the conditional expression in*/
+	/*  while statement					*/
+*af_repeat,             /* ...After the analysis of the operator in  repeat loop body*/
+*af_forassign,	        /* ...After analyzing the variable in the for statement		*/
+*af_for1, 		/* ...After analyzing the expression-first boundary of the loop parameter in the for statement			*/
+*af_ident;		/* ...After the identifier in the "variable"	*/
+
+/* Definition of sets presented as bit sets, 	*/
+/* for expressions				*/
 
 extern unsigned
 
-*op_rel,		/* операции отношения над простыми выражениями	*/
-*op_add,		/* аддитивные операции над слагаемыми		*/
-*op_mult;		/* мультипликативные операции над множителями	*/
+*op_rel,		/* Operations of relation over simple expressions	*/
+*op_add,		/* Additive operations on terms		*/
+*op_mult;		/* Multiplicative operations on factors	*/
 
-/* Описание реализуемых в виде битовых строк множеств способов исполь-	*/
-/* зования идентификаторов:						*/
-/* первое описание - в файле main.c					*/
+/* Definition of sets presented as bit sets for cases of identifiers usage	*/
 
 extern unsigned
 
-*set_VARCONFUNCS,	/* доп. способы использования - VARS, CONSTS, FUNCS */
-*set_VARS,	/* допустимый способ использования - VARS		*/
-*set_TYPES, 	/* допустимый способ использования - TYPES 		*/
-*set_CONSTS,	/* допустимый способ использования - CONSTS 		*/
-*set_TYCON,     /* допустимые способы использования - TYPES,CONSTS	*/
-*set_FUNCS,     /* допустимый способ использования - FUNCS              */
-*set_PROCS,     /* допустимый способ использования - PROCS              */
-*set_FUNPR,     /* допустимые способы использования - FUNCS,PROCS       */
-*set_VARFUNPR;  /* допустимые способы использования - VARS,FUNCS,PROCS  */
+*set_VARCONFUNCS,	/* Acceptable use of VARS, CONSTS, FUNCS */
+*set_VARS,	/* Acceptable use of  VARS		*/
+*set_TYPES, 	/*Acceptable use of  TYPES 		*/
+*set_CONSTS,	/* Acceptable use of  CONSTS 		*/
+*set_TYCON,     /* Acceptable use of  TYPES,CONSTS	*/
+*set_FUNCS,     /* Acceptable use of  FUNCS              */
+*set_PROCS,     /* Acceptable use of  PROCS              */
+*set_FUNPR,     /* Acceptable use of  FUNCS,PROCS       */
+*set_VARFUNPR;  /* Acceptable use of  VARS,FUNCS,PROCS  */
 
-/* Описание реализуемого в виде битовой строки множества кодов типов,	*/
-/* недопустимых для использования в том или ином контексте:		*/
-/* первое описание - в файле main.c					*/
 
-﻿

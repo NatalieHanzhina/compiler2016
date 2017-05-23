@@ -1,8 +1,8 @@
+﻿
 
+    /*  FILE  DECW.H      */
 
-    /*  МОДУЛЬ  DECW.H      */
-
-    /*  KОДЫ  РАЗДЕЛИТЕЛЕЙ  */
+    /*  DELIMITERS CODES  */
 
     #define  star         21               /*  '*'   */
     #define  slash        60               /*  '/'   */
@@ -30,18 +30,18 @@
     #define  assign       51               /*  ':='  */
     #define  twopoints    74               /*  '..'  */
 
-        /* типы  констант */
+        /* constant types */
 
-    #define  ident         2               /* идентификатор           */
-    #define  intc         15               /* с  фиксированной точкой */
-    #define  charc        83               /* символьная  константа   */
-    #define  stringc      84               /* строковая   константа   */
+    #define  ident         2               /* identifier          */
+    #define  intc         15               /*  with fixed point */
+    #define  charc        83               /* symbol const   */
+    #define  stringc      84               /* string const   */
 
-	/* вспомогательные константы */
+	/* auxilliary consts */
 
-    #define  endoffile   253               /* код конца файла         */
-    #define  eolint       88               /* признак конца последо-  */
-					   /* вательности целых чисел */
-    #define  FALSE         0               /* _______ Л О Ж Ь _______ */
-    #define  TRUE          1               /* _____ И С Т И Н А _____ */
+    #define  endoffile   253               /* end of file code         */
+    #define  eolint       88               /* the  end of integers sequence  */
+					   
+    #define  FALSE         0               
+    #define  TRUE          1               
 

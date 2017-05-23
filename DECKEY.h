@@ -1,21 +1,21 @@
 ﻿
 
 
-     /*  ФАЙЛ  DECKEY.H                         */
+     /*  FILE DECKEY.H                         */
 
-      /* ОБ"ЯВЛЕНИЕ      КОДОВ  КЛЮЧЕВЫХ  СЛОВ  */
+      /* DEFINITION OF KEY WORDS CODES  */
 
-      /*  список  ключевых  слов  */
+      /*  list of key words  */
       #define   dosy           54
       #define   ifsy           56
       #define   insy           22
       #define   ofsy            8
-      #define   orsy           23           /* разделитель  !   */
+      #define   orsy           23           /* delimiter  !   */
       #define   tosy           55
 
-      /* ключевые  слова  длины  2 */
+      /* key words with length  2 */
 
-      #define   andsy          24            /* разделитель   &  */
+      #define   andsy          24            /* delimiter   &  */
       #define   divsy          25
       #define   endsy          13
       #define   forsy          26
@@ -25,7 +25,7 @@
       #define   setsy          29
       #define   varsy          30
 
-      /*  ключевые  слова  длины  3 */
+      /*  key words with length  3 */
 
       #define   casesy         31
       #define   elsesy         32
@@ -38,7 +38,7 @@
       #define   usessy         36
       #define   withsy         37
 
-      /*  ключевые  слова   длины 4 */
+      /*  key words with length 4 */
 
       #define   arraysy        38
       #define   beginsy        17
@@ -47,7 +47,7 @@
       #define   untilsy        53
       #define   whilesy        41
 
-      /*  ключевые  слова   длины  5 */
+      /*  key words with length  5 */
 
       #define   downtosy        55
       #define   exportsy        91
@@ -59,27 +59,27 @@
       #define   vectorsy        45
       #define   stringsy        46
 
-      /*  ключевые  слова    длины 6 */
+      /*  key words with length 6 */
 
       #define   forwardsy       47
       #define   processsy       48
       #define   programsy        3
       #define   segmentsy       49
 
-      /*  ключевые  слова    длины 7 */
+      /*  key words with length 7 */
 
       #define   functionsy      77
       #define   separatesy      78
 
-      /*  ключевые  слова    длины 8 */
+      /*  key words with length 8 */
 
       #define  interfacesy      79
       #define  proceduresy      80
       #define  qualifiedsy      94
 
-      /*  ключевые   слова   длины 9 */
+      /*  key words with length 9 */
 
       #define  implementationsy 81
 
-      /*  ключевые  слова    длины 14 */
+      /*  key words with length 14 */
 

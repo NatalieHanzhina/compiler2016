@@ -1,0 +1,47 @@
+program example1;
+var a,b,l:integer;
+	c,de:real;
+	c,t:boolean;
+	b1,b2:boolean;
+function o(i:integer):boolean;
+forward;	
+function f(var s1,s2:integer; c:integer):integer;
+	var dd,h:boolean;
+	function e(b2:integer):boolean;
+		var t:integer;
+		begin
+			t:=a+b;
+			begin
+			e:=h;
+			c:=b2 mod 5;
+			end;
+		end;
+	begin
+		b2:=5;
+		t:=1-4 mod b1;
+		b2:=c-b2;
+		dd:=e(a);
+		b2:=true;
+		b1:=o(b);
+	end;
+function o:boolean;
+	var t:integer;
+	begin
+		t:=a+b;
+		begin
+		o:=b1;
+		c:=b2 mod 5;
+		t:=f(t,t,t);
+		end;
+	end;
+begin
+  read(a);
+  readln(c);
+  write(a*a+1);
+  writeln(a);
+	b2:=5;
+	de:=(a+b) mod 2 div b /a;
+	a:=f(c,c*c*c,3+l,4,y);
+	t:=o;
+	o:=t;
+end.

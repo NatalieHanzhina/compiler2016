@@ -1,130 +1,111 @@
-﻿
-		/* ФАЙЛ "RUMTABL3.C" - РАБОТА С ТАБЛИЦЕЙ ИМЕН */
+
+		/* FILE "RUMTABL3.C" WORKS WITH THE NAME TABLE */
 #include <stdio.h>
 #include <malloc.h>
 
 void writename();
 
 
-#define MAXHASH  997    /* максимальное значение hash-функции		*/
-#define MAXNUM   500    /* количество литер      			*/
-				/* в строке для разрешения коллизий	*/
+#define MAXHASH  997    /*The maximum value of the hash function		*/
+#define MAXNUM   500    /* Number of characters per line to resolve collisions	*/
 
-/* Встретится переменная lname - это длина текущего имени в литерах     */
-unsigned hashresult;    /* результат hash-функции для текущего имени	*/
-char *addrname;		/* адрес имени в таблице имен 			*/
+/* There will be a variable lname - this is the length of the current name in the letters     */
+unsigned hashresult;    /* The result of the hash function for the current name	*/
+char *addrname;		/* Address of name in the table of names 			*/
 
-struct zveno     	/* строка для разрешения коллизий		*/
-	{int firstfree; /* номер первой свободной позиции литеры        */
-							/*    в строке  */
-	char namelist[MAXNUM];	/* последовательность имен		*/
-	struct zveno *next;	/* указатель на следующую строку        */
-			/* с тем же значением hash-функции		*/
+struct zveno     	/* String for resolution collisions		*/
+	{int firstfree; /* The number of the first free position of the letter in the line  */
+	char namelist[MAXNUM];	/* Sequence of names		*/
+	struct zveno *next;	/* Pointer to the next line with the same value of the hash function		*/
 	};
 
 typedef struct zveno str;
 
-static str *nametable[MAXHASH],/* массив указателей на первые строки для*/
-		/* разрешения коллизий соответственно текущему значению */
-		/* hash-функции						*/
-    *ptrstr; 	/* указатель на текущую строку для разрешения коллизий  */
+static str *nametable[MAXHASH],/* Array of pointers to the first lines to resolve collisions according to the current value of the hash function						*/
+    *ptrstr; 	/* A pointer to the current line to resolve collisions  */
 
-static unsigned chcount,	/* счетчик литер текущего имени		*/
-		loccount;	/* счетчик литер в выделенной памяти	*/
+static unsigned chcount,	/* Counter of the current name		*/
+		loccount;	/* Character counter in dedicated memory	*/
 
-extern FILE *d;		/* для отладки 					*/
+extern FILE *d;		/* debug file					*/
 
 
 /*------------------------- S E A R C H I N T A B L E ------------------*/
-void		 SearchInTable	(name)	/* поиск текущего имени в таб-	*/
-			/* лице имен          				*/
-				char *name;	/* значение текущего 	*/
-			/* имени					*/
-				/* результаты - внешние переменные:	*/
-			/* addrname - адрес текущего имени в таблице 	*/
-			/* имен,  hashresult - результат hash-функции	*/
-			/* от текущего имени				*/
-{int ind;	/* если ind равен 0, значит, текущее имя не совпадает   */
-			/* с очередным именем в строке			*/
+void		 SearchInTable	(name)	/* Search for the current name in the table of names          				*/
+				char *name;	/* The value of the current name, the results are external variables: addrname - the address of the current name in the name table, hashresult - the result of the hash function from the current name				*/
+{int ind;	/* If ind is 0, then the current name does not match the next name in the string			*/
 hashresult=hash(name);
 #ifdef RDB
-fprintf(d,"\nИмя - %s,     hashresult==%d\n",name,hashresult);
+fprintf(d,"\n��� - %s,     hashresult==%d\n",name,hashresult);
 #endif
-if(nametable[hashresult]==NULL) 	/* размещение первой строки     */
-					/* для обработки коллизий 	*/
-	{ptrstr=(str*) malloc(sizeof(str)); /* выделение участка памяти */
-					/* под структуру str            */
+if(nametable[hashresult]==NULL) 	/* Placing the first row to handle collisions 	*/
+	{ptrstr=(str*) malloc(sizeof(str)); /* Allocating a space under the structure str            */
 	nametable[hashresult]=ptrstr;
 	(*ptrstr).firstfree=0;
 	(*ptrstr).next=NULL;
-	writename(name);/* занесение текущего имени в таблицу имен      */
+	writename(name);/* Entering the current name in the table of names      */
 #ifdef RDB
-	fprintf(d,"Cтрока чистая!\n");
+	fprintf(d,"C����� ������!\n");
 #endif
-	return;			/* возвращаем адрес имени в таблице     */
+	return;			/* Return the name in the table     */
 	}
 else    {
 #ifdef RDB
-	fprintf(d,"Коллизия! Начинаю поиск.\n");
+	fprintf(d,"��������! ������� �����.\n");
 #endif
-	ptrstr=nametable[hashresult];   /* коллизия; ищем имя в таблице */
+	ptrstr=nametable[hashresult];   /* Collision; Looking for a name in the table */
 	loccount=0;
 	search:
-	do	{/* установка начальных параметров для сравнения        */
-		/* искомого имени с очередным именем в таблице:         */
+	do	{/* Setting the initial parameters for comparing the searched name with the next name in the table:         */
 		ind=1;chcount=0;
 		addrname=&((*ptrstr).namelist[loccount]);
-		/* (адрес устанавливается по первой литере имени)       */
+		/* (The address is set by the first letter of the name)       */
 
 		while((addrname[chcount] !='\0')&&(ind==1)
 				&&(lname>=chcount))
 			{if(addrname[chcount] !=name[chcount])
-				ind=0; /* имена не совпадают		*/
+				ind=0; /* The names do not match		*/
 			else {loccount++;chcount++;}
 			}
 		if(ind==1)
 			{
 #ifdef RDB
-			fprintf(d,"Имя найдено!\n");
+			fprintf(d,"Name found!\n");
 #endif
-			return;}		/* имя найдено		*/
-	/* переход к следующему имени в строке:				*/
+			return;}		
+	/* Go to next name in row:				*/
 		while((*ptrstr).namelist[loccount++] !='\0');
 		}
-	while(loccount<(*ptrstr).firstfree); /* пока не встретим первую */
-					     /* свободную ячейку        */
-	/* (в случае, когда ее номер равен MAXNUM, все ячейки в строке  */
-	/* заняты)							*/
-	if((*ptrstr).next !=NULL) /* если существует следующая строка   */
-				  /* с тем же значением hash-функции    */
-		{ptrstr=(*ptrstr).next; /* ...то переходим на нее       */
+	while(loccount<(*ptrstr).firstfree); /* Until we meet the first free cell (in the case where its number is MAXNUM, all cells in the line are occupied)							*/
+	if((*ptrstr).next !=NULL) /* If there is a following line with the same value of the hash function    */
+		{ptrstr=(*ptrstr).next; /* ...Then go to it       */
 		loccount=0;
 #ifdef RDB
-		fprintf(d,"Продолжаю поиск в следующей строке!\n");
+		fprintf(d,"continue searching in the next line!\n");
 #endif
-		goto search;            /* ...и продолжаем поиск        */
+		goto search;           
 		}
-	else    /* поиск окончен, имя не найдено			*/
+	else    /* Search is over, name not found			*/
 		{if(lname<MAXNUM-(*ptrstr).firstfree)
-		/* (если наше имя вместится в остаток этой строки...)   */
-			{writename(name);/* ...то мы его туда и запишем!*/
+		/* (If  name fits into the rest of this line)   */
+			{writename(name);/* ...Then we will take it there and write it down*/
 #ifdef RDB
-			fprintf(d,"Добавила имя в эту же строку!\n");
+			fprintf(d,"Added a name in the same line!\n");
 #endif
 			return;
 			}
-		else    {/* места для записи имени нет,-                */
-			/* выделяем новую строку			*/
+		else    {/* There is no place for recording the name, -                */
+			/* Select a new line			*/
 #ifdef RDB
-			fprintf(d,"Выделяю новую строку...   ");
+			fprintf(d,"Select a new line...   ");
 #endif
 			(*ptrstr).next=(str*) malloc(sizeof(str));
 			ptrstr=(*ptrstr).next;
 			(*ptrstr).next=NULL;
 			(*ptrstr).firstfree=0;
-			writename(name);/* заносим имя в новую строку	*/
+			writename(name);/* Enter the name in a new line	*/
 #ifdef RDB
-			fprintf(d,"Записала в новой чистой строке!\n");
+			fprintf(d,"Recorded in a new line!\n");
 #endif
 			return;
 			}
@@ -133,20 +114,16 @@ else    {
 }
 
 /*--------------------------- W R I T E N A M E ------------------------*/
-void		 writename	(name)	/* занесение текущего имени 	*/
-			/* в таблицу имен		   		*/
-				char name[];	/* заносимое имя	*/
-				/* вызывается из SearchInTable(), все	*/
-			/* прочие аргументы берет из нее - внешние ста- */
-			/* тические переменные в файле RUMTABL3.C	*/
+void		 writename	(name)	/* Entering the current name in the table of names		   		*/
+				char name[];	/* The stored name is called from SearchInTable ()	*/
 {
 #ifdef RDB
 fprintf(d,"writename   ");
 #endif
 addrname=&((*ptrstr).namelist[(*ptrstr).firstfree]);
-	/* установили адрес заносимого имени 				*/
+	/* Set the address of the recorded name 				*/
 #ifdef RDB
-fprintf(d,"заносим имя: печатаю политерно:  ");
+fprintf(d,"Write a name:  ");
 #endif
 for(chcount=0,loccount=(*ptrstr).firstfree;name[chcount] !='\0';
 		chcount++,loccount++)
@@ -163,5 +140,5 @@ fprintf(d,"\n");
 #endif
 }
 
-/*-------------------------- К О Н Е Ц   Ф А Й Л А --------------------*/
+/*-------------------------- END OF FILE--------------------*/
 
