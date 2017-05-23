@@ -512,7 +512,7 @@ if (ch== '.' || ch=='E' || ch == 'e')
 			}
 		}  	/* if(ch=='.') */
 	/* So, the constant is real:				*/
-	symbol = floatc;
+	//symbol = floatc;
 	switch(ch)
 		{
 		case '.':

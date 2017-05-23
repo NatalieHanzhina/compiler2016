@@ -333,7 +333,7 @@ void newvariable()
 	};
 };
 
-//Это как раз Assigning a type to all variables waiting in the queue
+//\DD\F2\EE \EA\E0\EA \F0\E0\E7 Assigning a type to all variables waiting in the queue
 void addattributes(int flag)
 {
 	 struct listrec *listentry, *oldentry;
@@ -373,7 +373,7 @@ void addattributes(int flag)
  TYPEREC* SimpleExpression();
 
  // The IsConstant function returns 1 if the character is a numeric constant.
-  // Otherwise, returns 0. A reference to a constant type descriptor is added to the COnstantType variable.
+// Otherwise, returns 0. A reference to a constant type descriptor is added to the COnstantType variable.
  int IsConstant(unsigned smb)
  {
     if (smb == stringc)
@@ -394,7 +394,7 @@ void addattributes(int flag)
 	return 0;
  }
 // The "type" function checks the syntax and semantics of the type declaration, returning a reference to
-  // descriptor of this type
+ // descriptor of this type
  TYPEREC* type (unsigned *followers)
 {
 	//This is a type descriptor that we will return
@@ -1415,7 +1415,7 @@ void procfuncpart(unsigned *followers)
  }
 
  
-//Arithmetic operation checks - тупо перебором
+//Arithmetic operation checks - \F2\F3\EF\EE \EF\E5\F0\E5\E1\EE\F0\EE\EC
 
  //Checking an expression for belonging to a logical type
 TYPEREC* logical(TYPEREC* exptype)
@@ -1770,7 +1770,7 @@ TYPEREC* composed (unsigned *followers)
 // Function newident
 // Now we specify in it a reference to the type descriptor
 	CreatedNode->idtype = booltype;
-	Add the constant false to the logical type descriptor
+	//Add the constant false to the logical type descriptor
 	booltype->casetype.firstconst = newcons(booltype->casetype.firstconst, addrname);
 	CreatedNode->casenode.constvalue.boolval = 0;
 	//The same with true
