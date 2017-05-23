@@ -182,7 +182,7 @@ codes_block[]=		{labelsy,constsy,typesy,varsy,functionsy,
 	proceduresy,beginsy,eolint},	/* Start symbols for sections of descriptions and section of operators			*/
 codes_rightpar[]=	{rightpar,eolint},
 		/* right parenthesis 					*/
-codes_constant[]=	{plus,minus,charc,stringc,ident,intc,floatc,
+codes_constant[]=	{plus,minus,charc,stringc,ident,intc,
 	eolint},	/* Starting symbols for the construction constant       */
 codes_typ[]=		{packedsy,arrow,arraysy,filesy,setsy,recordsy,
 	plus,minus,ident,leftpar,intc,charc,stringc,eolint},
@@ -197,9 +197,9 @@ codes_statement[]=      {intc,endsy,elsesy,untilsy,ident,beginsy,ifsy,
 		/* {beginsy,ifsy,whilesy,repeatsy,forsy,casesy,withsy,  */
 		/* semicolon,gotosy,eolint} )                           */
 codes_express[]=	{ plus, minus, leftpar, lbracket, notsy, ident,
-	intc, floatc, charc, stringc, nilsy, eolint },
+	intc, charc, stringc, nilsy, eolint },
 		/* Starting symbols of an expression and a simple expression 	*/
-codes_termfact[]=	{ ident, leftpar, lbracket, notsy, intc, floatc,
+codes_termfact[]=	{ ident, leftpar, lbracket, notsy, intc, 
 	charc, stringc, nilsy, eolint };
 		/*Starting symbols for the term and multiplier 		*/
 
@@ -209,12 +209,12 @@ codes_termfact[]=	{ ident, leftpar, lbracket, notsy, intc, floatc,
 unsigned
 
 acodes_block[]=			{point,endoffile,eolint},	/* Symbols following the block construction in the main program */
-acodes_simpletype[]=		{comma,rbracket,eolint}, 	/* символы, ожидаемые сразу после вызова simpletype() во время анализа типа "массив" 				*/
+acodes_simpletype[]=		{comma,rbracket,eolint}, 	/* \F1\E8\EC\E2\EE\EB\FB, \EE\E6\E8\E4\E0\E5\EC\FB\E5 \F1\F0\E0\E7\F3 \EF\EE\F1\EB\E5 \E2\FB\E7\EE\E2\E0 simpletype() \E2\EE \E2\F0\E5\EC\FF \E0\ED\E0\EB\E8\E7\E0 \F2\E8\EF\E0 "\EC\E0\F1\F1\E8\E2" 				*/
 acodes_typ[]=		{endsy,rightpar,semicolon,eolint},	/* Characters expected immediately after analysis of the typ construct when calling the typ () function from fixpart ()		*/
 acodes_3const[]=	{twopoints,comma,rbracket,eolint},	/* Character codes expected immediately after the analysis of the constant 	*/
 acodes_listparam[]=     {colon,semicolon,forwardsy,constsy,varsy,eolint},
 		/* Characters expected immediately after the parameter list     */
-		/* ( functionsy,proceduresy,beginsy уже есть в  */
+		/* ( functionsy,proceduresy,beginsy \F3\E6\E5 \E5\F1\F2\FC \E2  */
 		/*   followers)                                         */
 acodes_factparam[]=      {comma,rightpar,eolint},
 		/* Characters expected immediately after parsing the actual parameters of procedures and functions                       */
@@ -245,7 +245,7 @@ codes_rel[]=		{ later, laterequal, greater, greaterequal,
 codes_add[]=		{ plus, minus, orsy, eolint },
 		/* Additive operations				*/
 codes_mult[]=		{ star, slash, divsy, modsy, andsy, eolint };
-		/* мультипликативные операции				*/
+		/* \EC\F3\EB\FC\F2\E8\EF\EB\E8\EA\E0\F2\E8\E2\ED\FB\E5 \EE\EF\E5\F0\E0\F6\E8\E8				*/
 
 /* Sets of codes for the acceptable use of identifiers:	*/
 
@@ -263,7 +263,7 @@ codes_VARFUNPR[]=       {VARS,FUNCS,PROCS,eolint};
 
 /* Sets of type codes that are not valid for use in a particular context*/
 
-unsigned codes_illegal[]={REFERENCES,RECORDS,SETS,FILES,ARRAYS,eolint};
+unsigned codes_illegal[]={eolint};
 
 int f=fileswork( argc, argv );
 
@@ -339,10 +339,9 @@ set_VARFUNPR=convert_to_bits(codes_VARFUNPR);
    programme();
    //dstfile=fopen(dfile,"a+");
 	
-   fprintf( dstfile, "\nThe compilation is over: number of errors is");
    if ( ErrorCount == 0 )
-      fprintf( dstfile, " null !\n");
-      else fprintf( dstfile, " - %3d !\n",ErrorCount );
+      fprintf( dstfile, "\nThe compilation is over: no errors\n");
+      else fprintf( dstfile, "\nThe compilation is over:  %3d errors!\n",ErrorCount );
 #ifdef TOUT
    fclose(t);
 #endif

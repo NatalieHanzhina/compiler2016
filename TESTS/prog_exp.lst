@@ -1,5 +1,5 @@
-               Работает Pascal - компилятор 
-                   Листинг программы
+               Pascal - compiler 
+                   Listing of the program
    1  program example1; 
    2  var a:integer; 
    3   
@@ -9,4 +9,4 @@
    7    write(a); 
    8  end. 
 
-Кoмпиляция окончена: ошибок нет !
+The compilation is over: no errors

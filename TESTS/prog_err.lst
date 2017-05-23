@@ -1,14 +1,14 @@
-               Работает Pascal - компилятор 
-                   Листинг программы
+               Pascal - compiler 
+                   Listing of the program
    1  program example1; 
    2  var a,b,l:integer; 
    3  	c,de:real; 
-**01**       ^ ошибка код  104 
-****** 104 : имя не описано
+**01**       ^ error code  104 
+****** 104 : Name is not declared
 
    4  	c,t:boolean; 
-**02**  ^ ошибка код  101 
-****** 101 : имя описано повторно
+**02**  ^ error code  101 
+****** 101 : Name is redeclared
 
    5  	b1,b2:boolean; 
    6  function o(i:integer):boolean; 
@@ -26,22 +26,22 @@
   18  		end; 
   19  	begin 
   20  		b2:=5; 
-**03**               ^ ошибка код  145 
-****** 145 : конфликт типов
+**03**               ^ error code  145 
+****** 145 : Type conflict
 
   21  		t:=1-4 mod b1; 
-**04**                       ^ ошибка код  145 
-****** 145 : конфликт типов
+**04**                       ^ error code  145 
+****** 145 : Type conflict
 
-**05**                       ^ ошибка код  145 
-****** 145 : конфликт типов
+**05**                       ^ error code  145 
+****** 145 : Type conflict
 
   22  		b2:=c-b2; 
-**06**                  ^ ошибка код  145 
-****** 145 : конфликт типов
+**06**                  ^ error code  145 
+****** 145 : Type conflict
 
-**07**                  ^ ошибка код  145 
-****** 145 : конфликт типов
+**07**                  ^ error code  145 
+****** 145 : Type conflict
 
   23  		dd:=e(a); 
   24  		b2:=true; 
@@ -54,11 +54,11 @@
   31  		begin 
   32  		o:=b1; 
   33  		c:=b2 mod 5; 
-**08**          ^ ошибка код  100 
-****** 100 : использование имени не соответствует описанию
+**08**          ^ error code  100 
+****** 100 : The use of a name does not match the description
 
-**09**          ^ ошибка код    6 
-******   6 : запрещенный символ
+**09**          ^ error code    6 
+******   6 : Forbidden character
 
   34  		t:=f(t,t,t); 
   35  		end; 
@@ -66,46 +66,46 @@
   37  begin 
   38    read(a); 
   39    readln(c); 
-**10**         ^ ошибка код  104 
-****** 104 : имя не описано
+**10**         ^ error code  104 
+****** 104 : Name is not declared
 
   40    write(a*a+1); 
   41    writeln(a); 
   42  	b2:=5; 
-**11**       ^ ошибка код  145 
-****** 145 : конфликт типов
+**11**       ^ error code  145 
+****** 145 : Type conflict
 
   43  	de:=(a+b) mod 2 div b /a; 
-**12**                          ^ ошибка код  145 
-****** 145 : конфликт типов
+**12**                          ^ error code  145 
+****** 145 : Type conflict
 
   44  	a:=f(c,c*c*c,3+l,4,y); 
-**13**       ^ ошибка код  104 
-****** 104 : имя не описано
+**13**       ^ error code  104 
+****** 104 : Name is not declared
 
-**14**       ^ ошибка код  189 
-****** 189 : конфликт типов параметров
+**14**       ^ error code  189 
+****** 189 : Conflict of types of parameters
 
-**15**         ^ ошибка код  104 
-****** 104 : имя не описано
+**15**         ^ error code  104 
+****** 104 : Name is not declared
 
-**16**         ^ ошибка код  189 
-****** 189 : конфликт типов параметров
+**16**         ^ error code  189 
+****** 189 : Conflict of types of parameters
 
-**17**          ^ ошибка код    6 
-******   6 : запрещенный символ
+**17**          ^ error code    6 
+******   6 : Forbidden character
 
-**18**                  ^ ошибка код    4 
-******   4 : должен идти символ  ')'
+**18**                  ^ error code    4 
+******   4 : ')' is expected
 
-**19**                  ^ ошибка код    6 
-******   6 : запрещенный символ
+**19**                  ^ error code    6 
+******   6 : Forbidden character
 
   45  	t:=o; 
-**20**      ^ ошибка код    4 
-******   4 : должен идти символ  ')'
+**20**      ^ error code    4 
+******   4 : ')' is expected
 
   46  	o:=t; 
   47  end. 
 
-Кoмпиляция окончена: ошибок -  20 !
+The compilation is over:   20 errors!

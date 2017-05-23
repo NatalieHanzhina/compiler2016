@@ -1,5 +1,5 @@
-               Работает Pascal - компилятор 
-                   Листинг программы
+               Pascal - compiler 
+                   Listing of the program
    1  program example1; 
    2  var a,i,b:integer; 
    3  function f(a,b:integer):integer; 
@@ -22,4 +22,4 @@
   20  writeln (a); 
   21  end. 
 
-Кoмпиляция окончена: ошибок нет !
+The compilation is over: no errors
