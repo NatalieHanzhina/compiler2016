@@ -42,30 +42,28 @@ make -i -f makefile
 # I/O Examples
 Примеры входных файлов в репозитории: 
 
-prog_err - с ошибками, 
+1. prog_err - с ошибками , 
 
-prog_r - без ошибок.
+2. prog_r - без ошибок. Input для программы в inp_inc
 
-prog_s.pas - без ошибок,
+3. prog_s.pas - без ошибок, input для программы в inp_cube,
 
-prog_exp - без ошибок, содержит выражение,
+4. prog_exp - без ошибок, содержит выражение,
 
-nod.pas - без ошибок, алгоритм Евклида вычисления НОД двух чисел.
+5. nod.pas - без ошибок, алгоритм Евклида вычисления НОД двух чисел. Input для программы в inp_nod
 
 Выходные: 
 
-prog_err.lst, 
+1. prog_err.lst, 
 
-prog_r.lst,
+2. prog_r.lst,
 
-prog_s.lst
-соответственно первым трем программам, 
+3. prog_s.lst
 
-output.asm - ассемблерный код для prog_s.pas,
+4. prog_exp.lst
 
-output_exp.asm - ассемблерный код для prog_exp,
+5. nod.lst
 
-output_nod.asm - ассемблерный код для nod.pas
 # Lang
 Язык pascal-подобный, поддерживает:
 
