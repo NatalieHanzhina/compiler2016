@@ -1,58 +1,56 @@
 # compiler2016
-Компилятор на C в ассемблер NASM.
-Реализованы лексический, синтаксический, семантический  анализ, генерация кода.
+The compiler is C in the NASM assembler. Implemented lexical, syntactic, semantic analysis, code generation.
 
-1. В файле Nextch.c содержится модуль ввода-вывода.
+The Nextch.c file contains an I / O module.
 
-2. В файле NEXTSYM4.C - основная логика лексического анализа.
+In the file NEXTSYM4.C - the basic logic of lexical analysis.
 
-3. В файле LAST.C - основная логика синтаксического, семантического анализа и генерация кода.
+In the file LAST.C - the basic logic of syntactic, semantic analysis and code generation.
 
-4. ERROR.C - занесение cведений об ошибке в список ошибок.
+ERROR.C - entering the information about the error in the error list.
 
-5. HASH.C - хэш-функция для таблицы имен.
+HASH.C is a hash function for the name table.
 
-6. LITFUNCS.C - функции для работы с битовыми множествами, которыми реализованы множества FOLLOW (в том числе проверка принадлежности множеству, объединение множеств, ). Реализует проверку совпадения сканируемого токена и ожидаемого. Реализует режим паники (пропуск токенов до первого "знакомого" при несовпадении текущего токена с ожидаемым).
+LITFUNCS.C - functions for working with bit sets, which implement FOLLOW sets (including the verification of belonging to a set, the union of sets,). Implements a check of the coincidence of the scanned token and the expected one. Implements a panic mode (passing tokens to the first "familiar" if the current token does not match the expected one).
 
-7. RUMTABL3.C - работа с таблицей имен. Реализованы занесение в таблицу имен на основе хэша, поиск в таблице имен.
+RUMTABL3.C - work with the table of names. Implemented the entry in the table of names based on the hash, search in the table of names.
 
-8. DECKEY.H - коды ключевых слов языка.
+DECKEY.H - language code of the language.
 
-9. DECW.H - коды токенов-разделителей, констант, вспомогательных констант.
+DECW.H - codes of tokens-delimiters, constants, auxiliary constants.
 
-10. ERR.H - структура данных об  ошибках для анализатора.
+ERR.H is the error data structure for the analyzer.
 
-11. FUNCS.H - объявление функций.
+FUNCS.H - declaration of functions.
 
-12. IODEFS.H - константы для блока ввода-вывода.
+IODEFS.H - constants for the I / O block.
 
-13. RUMERCOD.h - коды ошибок для анализа.
+RUMERCOD.h - error codes for analysis.
 
-14. TEXTP.H  - структуры для позиции текущего токена во входном потоке.
+TEXTP.H - structures for the position of the current token in the input stream.
 
-15. TREE.H - константы для типов идентификаторов для анализа.
+TREE.H - constants for types of identifiers for analysis.
 
-16. TYPES.H - объявление кодов базовых типов.
+TYPES.H - declaration of codes of basic types.
 
-17. TYPET.h - объявление внешних переменных.
+TYPET.h - declaration of external variables.
 
 # Run tests
 make -i -f makefile 
 
 # I/O Examples
-Примеры входных файлов в репозитории: 
+Examples of input files in the repository:
 
-1. prog_err - с ошибками , 
+1. prog_err - with errors,
 
-2. prog_r - без ошибок. Input для программы в inp_inc
+2. prog_r - without errors. Input for the program in inp_inc
 
-3. prog_s.pas - без ошибок, input для программы в inp_cube,
+3. prog_s.pas - without errors, input for the program in inp_cube,
 
-4. prog_exp - без ошибок, содержит выражение,
+4. prog_exp - without errors, contains an expression,
 
-5. nod.pas - без ошибок, алгоритм Евклида вычисления НОД двух чисел. Input для программы в inp_nod
-
-Выходные: 
+5. nod.pas - without errors, Euclid's algorithm for computing the GCD of two numbers. Input for the program in inp_nod
+Output: 
 
 1. prog_err.lst, 
 
@@ -65,35 +63,35 @@ make -i -f makefile
 5. nod.lst
 
 # Lang
-Язык pascal-подобный, поддерживает:
+The language is pascal-like, supports:
 
-1. целый, логический типы, 
+1. integer, logical types,
 
-2. раздел переменных,
+2. section of variables,
 
-3. раздел функций, процедур,
+3. a section of functions, procedures,
 
-4. передачу в функции параметров по значению.
+4. transmission in function of parameters by value.
 
-5. операцию присваивания,
+5. Assignment operation,
 
-6. операции сложения, вычитания, деления нацело и с остатком, сравнения, логического И, ИЛИ, НЕ,
+6. operations of addition, subtraction, division with the remainder, comparison, logical AND, OR, NOT,
 
-7. выражения со скобками,
+7. expressions with brackets,
 
-8. вызов функций, процедур,
+8. call functions, procedures,
 
-9. функции ввода/вывода (read, readln, write, writeln)
+9. I / O functions (read, readln, write, writeln)
 
-10. пустой оператор,
+10. An empty statement,
 
-11. условный оператор (полный и сокращенный),
+11. Conditional operator (full and abbreviated),
 
-12. циклы с предусловием (while do) и с постусловием (repeat until),
+12. cycles with a precondition (while do) and with a postcondition (repeat until),
 
-13. простой и составной операторы,
+13. Simple and compound operators,
 
-14. комментарии.
+14. Comments.
 
 
 ## Язык следующий:
